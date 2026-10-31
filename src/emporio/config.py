@@ -21,6 +21,7 @@ DEFAULT_TODAY = date(2026, 3, 23)
 class Settings:
     llm_provider: str
     anthropic_model: str
+    anthropic_effort: str
     ollama_host: str
     ollama_model: str
     today: date
@@ -38,7 +39,8 @@ def load_settings() -> Settings:
         today = date.fromisoformat(today_raw)
     return Settings(
         llm_provider=os.getenv("LLM_PROVIDER", "anthropic").strip().lower(),
-        anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-opus-5-5"),
+        anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5-5"),
+        anthropic_effort=os.getenv("ANTHROPIC_EFFORT", "low"),
         ollama_host=os.getenv("OLLAMA_HOST", "http://localhost:11434"),
         ollama_model=os.getenv("OLLAMA_MODEL", "qwen2.5:3b"),
         today=today,

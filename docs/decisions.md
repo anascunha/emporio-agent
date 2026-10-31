@@ -41,3 +41,17 @@ Legend: **Ana** = my decision · **Claude → Ana** = option proposed by Claude 
 | 21 | Defect exchanges count **30 days from purchase** (4.2); the legal warranty counts **90 days from receipt** (8.1) | Claude | That is literally what each section says; it creates the non-trivial case where a store exchange has expired but the legal warranty still applies. |
 | 22 | Failed order verifications are **locked after 5 attempts** per conversation | Claude | Prevents enumerating orders by trying e-mails/phones. |
 | 23 | Escalations are appended to `data/runtime/escalations.jsonl` (git-ignored) with a protocol number | Claude | Simulates handing the case to the team (manual 7.3: complaints get a reply within 24 business hours). |
+
+## 2026-10-31 — Agent, prompt and LLM backends
+
+| # | Decision | Who | Why |
+|---|---|---|---|
+| 24 | Persona **"Mel"** (from *melodia*), informal but professional, answering in the customer's language | Ana | Short, friendly name for a WhatsApp-like channel; tone required by manual 7.1. |
+| 25 | **Claude Sonnet 5.5** as the default model, to be confirmed by a model-comparison **evaluation** | Ana | Good balance of tool-use quality, speed and cost for customer service; the evaluation should back the choice with data instead of intuition. |
+| 26 | Reasoning effort **`low`** by default (configurable) | Claude | Chat answers should be fast; the hard rules live in the tools, not in long reasoning. |
+| 27 | Each backend keeps the history in its **native format** behind a 4-method `ChatSession` interface | Claude | Anthropic replies carry thinking blocks that must be sent back unchanged; Ollama uses `tool` messages. A common format would lose information. |
+| 28 | **Prompt caching** of system prompt, tools and history on Anthropic | Claude | They are resent every turn; caching cuts cost and latency. |
+| 29 | At most **6 tool rounds** per customer message, then a polite fallback | Claude | A confused model cannot loop forever. |
+| 30 | Ollama: recover tool calls that a small model writes as JSON in the text | Claude | Common failure of 3B models; only accepted when the name matches a real tool. |
+
+First local run (qwen2.5:3b on a GTX 1650): price question answered correctly via `search_products`, but the opening-hours question was answered **without calling `get_policy`** (evasive answer), ~1 min per reply. Evidence for #2 and input for the evaluation.
