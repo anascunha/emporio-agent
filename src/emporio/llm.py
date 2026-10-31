@@ -31,6 +31,9 @@ class Turn:
 
 
 class ChatSession(ABC):
+    #: Token counters accumulated over the conversation (used by the evaluation).
+    usage: dict[str, int]
+
     @abstractmethod
     def add_user_message(self, text: str) -> None: ...
 
@@ -62,6 +65,7 @@ class AnthropicSession(ChatSession):
             for t in tools
         ]
         self.messages: list[dict] = []
+        self.usage = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
 
     def add_user_message(self, text: str) -> None:
         self.messages.append({"role": "user", "content": text})
@@ -76,6 +80,7 @@ class AnthropicSession(ChatSession):
             output_config={"effort": self.effort},
             cache_control={"type": "ephemeral"},  # also cache the growing history
         )
+        self._count(getattr(response, "usage", None))
         # Keep the full content (thinking and tool_use blocks) exactly as returned.
         self.messages.append({"role": "assistant", "content": response.content})
         text = "".join(b.text for b in response.content if b.type == "text").strip()
@@ -106,6 +111,14 @@ class AnthropicSession(ChatSession):
     def message_count(self) -> int:
         return len(self.messages)
 
+    def _count(self, usage) -> None:
+        if usage is None:
+            return
+        self.usage["input"] += usage.input_tokens or 0
+        self.usage["output"] += usage.output_tokens or 0
+        self.usage["cache_read"] += getattr(usage, "cache_read_input_tokens", 0) or 0
+        self.usage["cache_write"] += getattr(usage, "cache_creation_input_tokens", 0) or 0
+
 
 def _is_error(output: str) -> bool:
     try:
@@ -128,6 +141,7 @@ class OllamaSession(ChatSession):
         self.tools = [{"type": "function", "function": t} for t in tools]
         self.tool_names = {t["name"] for t in tools}
         self.messages: list[dict] = [{"role": "system", "content": system}]
+        self.usage = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
 
     def add_user_message(self, text: str) -> None:
         self.messages.append({"role": "user", "content": text})
@@ -139,6 +153,8 @@ class OllamaSession(ChatSession):
             tools=self.tools,
             options={"temperature": 0.2, "num_ctx": 8192},
         )
+        self.usage["input"] += getattr(response, "prompt_eval_count", 0) or 0
+        self.usage["output"] += getattr(response, "eval_count", 0) or 0
         message = response.message
         text = (message.content or "").strip()
         calls = [

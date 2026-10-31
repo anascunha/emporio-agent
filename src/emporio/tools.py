@@ -18,6 +18,7 @@ from .store import ORDER_STATUS, Order, Product, Store, describe_payment, instal
 from .text import brl
 
 MAX_FAILED_VERIFICATIONS = 5
+SEARCH_LIMIT = 10
 REGRET_DAYS = 7
 DEFECT_EXCHANGE_DAYS = 30
 LEGAL_WARRANTY_DAYS = 90
@@ -166,8 +167,13 @@ class ToolExecutor:
         min_price: float | None = None,
         max_price: float | None = None,
     ) -> dict:
-        found = self.store.search_products(query, category, min_price, max_price)
-        result: dict[str, Any] = {"products": [self._summary(p) for p in found]}
+        found = self.store.search_products(query, category, min_price, max_price, limit=100)
+        result: dict[str, Any] = {"products": [self._summary(p) for p in found[:SEARCH_LIMIT]]}
+        if len(found) > SEARCH_LIMIT:
+            result["note"] = (
+                f"Showing the {SEARCH_LIMIT} best matches out of {len(found)}. "
+                "Ask the customer to narrow down (price range, nylon/steel, brand...)."
+            )
         if query:
             # Unavailable products named by the customer are reported, so the agent can
             # say "out of stock / discontinued" and suggest alternatives (manual 7.3).
