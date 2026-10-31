@@ -11,6 +11,7 @@ from time import perf_counter
 import streamlit as st
 
 from chat_ui.render import TYPING_HTML, header_html, inject_css, is_dark, quick_replies, render_history
+from chat_ui.i18n import LANGUAGES, TEXT, hero_html
 from chat_ui.skins import SKINS
 from chat_ui.state import (
     CHANNELS,
@@ -44,6 +45,12 @@ with st.sidebar:
     channel = st.segmented_control(
         "Channel", CHANNELS, default=requested if requested in CHANNELS else "messenger",
         required=True, format_func=lambda c: SKINS[c].label, key="channel",
+    )
+    requested_lang = st.query_params.get("lang", "en")
+    lang = st.segmented_control(
+        "Interface language", list(LANGUAGES), default=requested_lang if requested_lang in LANGUAGES else "en",
+        required=True, format_func=LANGUAGES.get, key="lang",
+        help="Language of the chat interface. Mel always answers in the customer's language.",
     )
     requested_theme = st.query_params.get("theme", "light")
     theme = st.segmented_control(
@@ -79,25 +86,10 @@ if show_tools and conv.agent is not None:
     )
 
 # ----- customer view -------------------------------------------------------------------
-WEB_HERO = """
-<div class="web-hero">
-  <div class="eyebrow">Campo Grande · MS · desde 2008</div>
-  <h1>Empório da Música</h1>
-  <div class="tagline">Sua música começa aqui.</div>
-  <div class="facts">
-    <div class="fact"><b>LOJA</b><span>Rua 14 de Maio, 3200 · Centro</span></div>
-    <div class="fact"><b>HORÁRIO</b><span>Seg a sex 9h às 18h · Sáb 9h às 13h</span></div>
-    <div class="fact"><b>PAGAMENTO</b><span>5% off no PIX · até 12x sem juros</span></div>
-    <div class="fact"><b>ENTREGA</b><span>Frete grátis acima de R$ 500 na Grande Campo Grande</span></div>
-  </div>
-  <div class="cta">Dúvidas sobre instrumentos, pedidos ou trocas? <strong>Fale com a Mel</strong>, nossa assistente virtual.</div>
-</div>
-"""
-
 if channel == "website":
     hero_col, chat_col = st.columns([1.15, 1], gap="large", vertical_alignment="top")
     with hero_col:
-        st.html(WEB_HERO)
+        st.html(hero_html(lang))
     chat_area = chat_col
 else:
     chat_area = st.container()
@@ -106,24 +98,24 @@ with chat_area, st.container(key=f"{skin.key}-frame", gap=None):
     header = st.empty()
     messages = st.container(key=f"{skin.key}-msgs", height=520, autoscroll=True, gap="small")
     chips = st.container(key=f"{skin.key}-chips", horizontal=True, wrap=True, gap="xsmall") if skin.quick_replies else None
-    typed = st.chat_input(skin.placeholder, key=f"{skin.key}-input", submit_mode="disable")
+    typed = st.chat_input(TEXT[lang][skin.key]["placeholder"], key=f"{skin.key}-input", submit_mode="disable")
     if channel == "website":
-        st.html('<div class="web-powered">Atendimento virtual · respostas com base no sistema da loja</div>')
+        st.html(f'<div class="web-powered">{TEXT[lang]["powered"]}</div>')
 
 message = typed or pop_queued(channel)
 busy = bool(message)
-header.html(header_html(skin, typing=busy))
+header.html(header_html(skin, lang, typing=busy))
 if chips is not None:
     with chips:
-        quick_replies(skin, channel, on_click=queue, disabled=busy)
+        quick_replies(skin, lang, channel, on_click=queue, disabled=busy)
 if busy:
     conv.turns.append(ChatTurn(message, now_hhmm()))
 
 with messages:
     if channel == "messenger":
-        st.html('<div class="msgr-day"><span>HOJE</span></div>')
-        st.html('<div class="chat-notice msgr-notice">Atendimento virtual da Mel · peça um atendente quando quiser</div>')
-    render_history(skin, conv, show_tools, in_flight=busy)
+        st.html(f'<div class="msgr-day"><span>{TEXT[lang]["day"]}</span></div>')
+        st.html(f'<div class="chat-notice msgr-notice">{TEXT[lang]["msgr_notice"]}</div>')
+    render_history(skin, lang, conv, show_tools, in_flight=busy)
 
 if busy:
     with messages:

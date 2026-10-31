@@ -12,6 +12,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from .i18n import TEXT
 from .skins import Skin
 from .state import ChatTurn, Conversation, md_escape
 
@@ -36,15 +37,16 @@ def inject_css(skin: Skin, dark: bool) -> None:
     st.html(f"<style>:root{{{variables}}}\n{css}</style>")
 
 
-def header_html(skin: Skin, typing: bool) -> str:
-    status = skin.status_typing if typing else skin.status_idle
+def header_html(skin: Skin, lang: str, typing: bool) -> str:
+    text = TEXT[lang][skin.key]
+    status = text["status_typing"] if typing else text["status_idle"]
     statusbar = (
         '<div class="msgr-statusbar"><span>9:41</span><span>5G ▮▮▮ 87%</span></div>' if skin.key == "msgr" else ""
     )
     return statusbar + (
         f'<div class="chat-header {skin.key}-header">'
         f'<div class="avatar">{html.escape(skin.avatar)}</div>'
-        f'<div class="who"><div class="name">{html.escape(skin.title)}</div>'
+        f'<div class="who"><div class="name">{html.escape(text["title"])}</div>'
         f'<div class="status{" typing-status" if typing else ""}">{html.escape(status)}</div></div>'
         "</div>"
     )
@@ -79,11 +81,11 @@ def tool_viewer(skin: Skin, key: str, turn: ChatTurn) -> None:
             st.json(event.result, expanded=False)
 
 
-def render_history(skin: Skin, conv: Conversation, show_tools: bool, in_flight: bool) -> None:
+def render_history(skin: Skin, lang: str, conv: Conversation, show_tools: bool, in_flight: bool) -> None:
     """Draw the whole conversation. The last turn may still be waiting for its reply."""
-    if skin.greeting:
+    if skin.greets:
         with st.container(key=f"{skin.key}-row-bot-greeting", gap="xxsmall"):
-            bubble(skin, "bot", "greeting", skin.greeting, None)
+            bubble(skin, "bot", "greeting", TEXT[lang]["greeting"], None)
     for i, turn in enumerate(conv.turns):
         waiting = in_flight and i == len(conv.turns) - 1
         answered = turn.reply is not None
@@ -95,15 +97,15 @@ def render_history(skin: Skin, conv: Conversation, show_tools: bool, in_flight: 
                 if show_tools:
                     tool_viewer(skin, str(i), turn)
         elif turn.error:
-            notice(skin, "⚠️ Não foi possível responder agora. Tente novamente em instantes.")
+            notice(skin, TEXT[lang]["error"])
             if show_tools:
                 st.caption(f"Developer detail: {turn.error}")
         elif not waiting:
-            notice(skin, "Mensagem não respondida. Envie novamente, por favor.")
+            notice(skin, TEXT[lang]["unanswered"])
 
 
-def quick_replies(skin: Skin, channel: str, on_click, disabled: bool) -> None:
-    for n, label in enumerate(skin.quick_replies):
+def quick_replies(skin: Skin, lang: str, channel: str, on_click, disabled: bool) -> None:
+    for n, label in enumerate(TEXT[lang]["quick_replies"]):
         st.button(
             md_escape(label),
             key=f"{skin.key}-chip-{n}",

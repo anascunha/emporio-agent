@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pytest
 from streamlit.testing.v1 import AppTest
 
+from chat_ui.i18n import TEXT
 from chat_ui.skins import SKINS
 from chat_ui.state import md_escape
 from emporio.agent import Reply, ToolEvent
@@ -71,13 +72,22 @@ def test_website_channel_has_greeting_and_quick_replies(agents):
     at = app()
     at.sidebar.segmented_control(key="channel").set_value("website").run()
     assert not at.exception
-    assert "assistente virtual" in markdown_text(at)
+    assert "virtual assistant" in markdown_text(at)  # English interface by default
     assert at.button(key="web-chip-0")
 
 
 def test_quick_reply_sends_its_label(agents):
     at = app()
     at.sidebar.segmented_control(key="channel").set_value("website").run()
+    at.button(key="web-chip-2").click().run()
+    assert agents.created[0].received == ["Store hours"]
+
+
+def test_portuguese_interface_option(agents):
+    at = app()
+    at.sidebar.segmented_control(key="channel").set_value("website").run()
+    at.sidebar.segmented_control(key="lang").set_value("pt").run()
+    assert "assistente virtual" in markdown_text(at)
     at.button(key="web-chip-2").click().run()
     assert agents.created[0].received == ["Horário da loja"]
 
@@ -102,7 +112,7 @@ def test_agent_errors_become_a_chat_notice(agents):
     at = app()
     at.chat_input(key="msgr-input").set_value("oi").run()
     assert not at.exception
-    assert any("Não foi possível responder" in h.value for h in at.get("html"))
+    assert any("reply right now" in h.value for h in at.get("html"))
     assert "no credits" in at.sidebar.error[0].value  # the developer sees the cause and the fix
 
 
@@ -110,6 +120,7 @@ def test_md_escape_and_no_trademark_in_skins():
     assert md_escape("R$ 1 e R$ 2") == r"R\$ 1 e R\$ 2"
     for skin in SKINS.values():
         assert "whatsapp" not in repr(skin).lower()
+    assert "whatsapp" not in repr(TEXT).lower()
 
 
 def test_css_files_have_no_less_than_sign():

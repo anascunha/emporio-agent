@@ -79,6 +79,8 @@ The web chat has a **sidebar** on the left and the conversation on the right.
   - **💻 Website chat**: a store-branded widget like the one on a website, with a greeting and quick-reply buttons such as *"Ver violões até R$ 1.000"*, *"Status do meu pedido"*, *"Horário da loja"* and *"Trocas e devoluções"*.
   
   Each channel keeps **its own separate conversation**, so you can test two scenarios side by side. Both channels use the same Mel underneath. The channels are a simulation; see the [FAQ](#10-faq).
+- **Interface language.** English (default) or Português. It changes the chat's buttons, greeting and labels; Mel always answers in the language the customer writes in.
+- **Theme.** Light, Dark or Auto (follows your computer).
 - **Provider / model selector.** Switch between Claude and Ollama models. Changing it may start a fresh conversation.
 - **Show tool calls** (OFF by default). When ON, a collapsed developer note under each reply shows which lookup Mel ran ([tool call](#11-glossary)) and what came back. Turn it on when testing: it lets you confirm an answer came from the system and not from Mel's imagination.
 - **New conversation.** Clears the current channel's conversation and starts over (also resets the failed-attempts counter for orders).

@@ -38,16 +38,12 @@ BRAND_DARK = {
 
 @dataclass(frozen=True)
 class Skin:
-    key: str  # CSS class / widget key prefix
+    key: str  # CSS class / widget key prefix; also the key of its texts in i18n.TEXT
     label: str  # shown in the developer sidebar
-    title: str
-    status_idle: str
-    status_typing: str
     avatar: str
-    placeholder: str
     ticks: bool
-    greeting: str | None
-    quick_replies: tuple[str, ...]
+    greets: bool  # website widgets greet first; on a messaging app the customer starts
+    quick_replies: bool
     css_file: str
     palette_light: dict[str, str]
     palette_dark: dict[str, str]
@@ -56,14 +52,10 @@ class Skin:
 MESSENGER = Skin(
     key="msgr",
     label="📱 Mobile messenger",
-    title="Empório da Música",
-    status_idle="online",
-    status_typing="digitando…",
     avatar="EM",
-    placeholder="Mensagem",
     ticks=True,
-    greeting=None,  # on a messaging app the customer starts the conversation
-    quick_replies=(),
+    greets=False,
+    quick_replies=False,
     css_file="messenger.css",
     palette_light={
         **BRAND_LIGHT,
@@ -84,23 +76,10 @@ MESSENGER = Skin(
 WEBSITE = Skin(
     key="web",
     label="💻 Website chat",
-    title="Fale com a Mel",
-    status_idle="Online agora",
-    status_typing="Mel está digitando…",
     avatar="🎵",
-    placeholder="Escreva sua mensagem…",
     ticks=False,
-    greeting=(
-        "Oi! Eu sou a **Mel**, assistente virtual da Empório da Música 🎸\n\n"
-        "Posso te ajudar a encontrar um instrumento, ver o status de um pedido ou tirar "
-        "dúvidas sobre a loja. Como posso ajudar?"
-    ),
-    quick_replies=(
-        "Ver violões até R$ 1.000",
-        "Status do meu pedido",
-        "Horário da loja",
-        "Trocas e devoluções",
-    ),
+    greets=True,
+    quick_replies=True,
     css_file="website.css",
     palette_light={
         **BRAND_LIGHT,
