@@ -179,7 +179,7 @@ All customer data is fictional, so it's fine to use it for testing.
 
 | Command | What it does | Cost |
 |---|---|---|
-| `uv run pytest` | 66 quick tests of the business rules (prices, promotions, installments, deadlines, order checks). Runs in seconds, no AI involved | Free |
+| `uv run pytest` | 68 quick tests of the business rules (prices, promotions, installments, deadlines, order checks). Runs in seconds, no AI involved | Free |
 | `uv run python -m evals.run` | Runs 16 test conversations ([evaluation](#11-glossary)) against several models and grades them with code checks plus an [LLM-as-judge](#11-glossary). Results go to `evals/results/` | Uses API credits; the judge alone costs about **US$ 2 per full run**. Use `--no-judge` or `--cases 03 11` to run less |
 | `uv run python -m evals.language_probe` | Experiment checking that Mel answers English speakers in English | Uses API credits |
 
