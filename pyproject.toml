@@ -14,9 +14,13 @@ dependencies = [
     "python-dotenv>=1.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 ui = ["streamlit>=1.40"]
 dev = ["pytest>=8.0"]
+
+[tool.uv]
+# `uv sync` installs everything needed to run the CLI, the web UI and the tests.
+default-groups = ["ui", "dev"]
 
 [project.scripts]
 emporio = "emporio.cli:main"
