@@ -2,8 +2,12 @@
 
 Hypothesis (from evaluation case 16): smaller models drift into Portuguese when the
 context fills with Portuguese text returned by tools, especially long policy-manual
-sections. Each English question is asked N times in a fresh conversation, with the
-current prompt and with an extra language reminder, and we count wrong-language answers.
+sections. Each English question is asked N times in a fresh conversation, with and
+without the per-message language hint (Agent.language_hints), and we count answers in
+the wrong language.
+
+Earlier result, kept for the record: an extra reminder at the end of the *system prompt*
+only reduced Haiku's wrong-language answers from 13/15 to 9/15.
 
     python -m evals.language_probe --model claude-haiku-5-5 --runs 5
 """
@@ -15,7 +19,6 @@ from collections import defaultdict
 
 from emporio.agent import create_agent
 from emporio.config import load_settings
-from emporio.prompts import build_system_prompt
 
 from .checks import detect_language
 
@@ -25,21 +28,14 @@ QUESTIONS = {
     "catalog + policy": "Hi! How much is the Yamaha F310, and can I pay in installments?",
 }
 
-REMINDER = (
-    "\nLanguage reminder: tool results and the manual are in Portuguese, but always reply "
-    "in the language of the customer's latest message. If the customer writes in English, "
-    "the whole reply must be in English.\n"
-)
 
-
-def run(model: str, runs: int, with_reminder: bool) -> dict[str, dict]:
+def run(model: str, runs: int, language_hints: bool) -> dict[str, dict]:
     settings = load_settings()
     stats: dict[str, dict] = defaultdict(lambda: {"wrong": 0, "runs": 0, "policy_calls": 0})
     for label, question in QUESTIONS.items():
         for _ in range(runs):
             agent = create_agent(settings, "anthropic", model)
-            if with_reminder:
-                agent.session.system[0]["text"] = build_system_prompt(settings.today) + REMINDER
+            agent.language_hints = language_hints
             reply = agent.reply(question)
             s = stats[label]
             s["runs"] += 1
@@ -57,9 +53,9 @@ def main() -> None:
     print(f"Model: {args.model}, {args.runs} runs per question\n")
     print("| Question type | Variant | Answered in Portuguese | Called get_policy |")
     print("|---|---|---|---|")
-    for with_reminder in (False, True):
-        variant = "prompt + language reminder" if with_reminder else "current prompt"
-        for label, s in run(args.model, args.runs, with_reminder).items():
+    for hints in (False, True):
+        variant = "per-message language hint" if hints else "no hint (prompt rule only)"
+        for label, s in run(args.model, args.runs, hints).items():
             print(f"| {label} | {variant} | {s['wrong']}/{s['runs']} | {s['policy_calls']}/{s['runs']} |")
 
 

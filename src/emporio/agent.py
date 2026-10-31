@@ -10,6 +10,7 @@ from .llm import AnthropicSession, ChatSession, OllamaSession
 from .policies import PolicyManual
 from .prompts import build_system_prompt
 from .store import Store
+from .text import detect_language
 from .tools import ToolExecutor
 
 # Upper bound on tool rounds per customer message, so a confused model cannot loop forever.
@@ -35,12 +36,19 @@ class Reply:
 
 
 class Agent:
-    def __init__(self, session: ChatSession, tools: ToolExecutor):
+    def __init__(self, session: ChatSession, tools: ToolExecutor, language_hints: bool = True):
         self.session = session
         self.tools = tools
+        # The data and manual are Portuguese, which pulls smaller models into answering
+        # English speakers in Portuguese; a per-message hint counters that (see evals).
+        self.language_hints = language_hints
+        self.language: str | None = None  # last language detected in this conversation
 
     def reply(self, message: str) -> Reply:
-        self.session.add_user_message(message)
+        if self.language_hints:
+            # Messages with no signal (an e-mail, "ok") keep the conversation's language.
+            self.language = detect_language(message) or self.language
+        self.session.add_user_message(message, self.language)
         events: list[ToolEvent] = []
         for _ in range(MAX_TOOL_ROUNDS):
             turn = self.session.complete()

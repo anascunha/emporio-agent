@@ -18,8 +18,8 @@ class ScriptedSession(ChatSession):
         self.turns = list(turns)
         self.user_messages, self.tool_results = [], []
 
-    def add_user_message(self, text):
-        self.user_messages.append(text)
+    def add_user_message(self, text, reply_language=None):
+        self.user_messages.append((text, reply_language))
 
     def complete(self):
         return self.turns.pop(0)
@@ -153,3 +153,24 @@ def test_ollama_ignores_json_that_is_not_a_known_tool():
     session = OllamaSession("m", "system", [SCHEMA], host="", client=FakeOllama([ollama_message('{"a": 1}')]))
     session.add_user_message("?")
     assert session.complete().tool_calls == []
+
+
+def test_customer_language_is_detected_and_passed_as_hint(tools):
+    session = ScriptedSession([Turn("Hi!"), Turn("Oi!"), Turn("...")])
+    agent = Agent(session, tools)
+    agent.reply("Hi! How much is the Yamaha F310?")
+    agent.reply("anacarol.ferreira@coldmail.com")  # no signal: keeps English
+    agent.reply("Oi, quanto custa o Yamaha F310?")
+    assert [lang for _, lang in session.user_messages] == ["en", "en", "pt"]
+
+
+def test_anthropic_language_hint_is_a_system_message_after_the_user_turn():
+    messages = FakeAnthropicMessages(
+        [SimpleNamespace(stop_reason="end_turn", content=[block("text", text="Hi!")])]
+    )
+    session = AnthropicSession("m", "system", [], client=SimpleNamespace(messages=messages))
+    session.add_user_message("Hi there", "en")
+    session.complete()
+    sent = messages.requests[0]["messages"]
+    assert sent[0] == {"role": "user", "content": "Hi there"}
+    assert sent[1]["role"] == "system" and "English" in sent[1]["content"]

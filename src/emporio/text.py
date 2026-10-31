@@ -38,7 +38,7 @@ EN_WORDS = {"you", "the", "and", "for", "with", "can", "is", "your", "we", "have
 
 def detect_language(text: str) -> str | None:
     """'pt', 'en', or None when the text gives no clear signal (e.g. 'ok', an e-mail)."""
-    words = tokens(text)
+    words = tokens(re.sub(r"\S+@\S+|https?://\S+", " ", text))  # ".com" is not Portuguese
     pt = sum(w in PT_WORDS for w in words)
     en = sum(w in EN_WORDS for w in words)
     if pt == en:

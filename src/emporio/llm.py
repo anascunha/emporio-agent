@@ -30,12 +30,21 @@ class Turn:
     tool_calls: list[ToolCall] = field(default_factory=list)
 
 
+LANGUAGE_NAMES = {"pt": "Portuguese", "en": "English"}
+
+
+def language_hint(language: str) -> str:
+    return f"The customer is writing in {LANGUAGE_NAMES[language]}: reply in {LANGUAGE_NAMES[language]}."
+
+
 class ChatSession(ABC):
     #: Token counters accumulated over the conversation (used by the evaluation).
     usage: dict[str, int]
 
     @abstractmethod
-    def add_user_message(self, text: str) -> None: ...
+    def add_user_message(self, text: str, reply_language: str | None = None) -> None:
+        """Append the customer's message; `reply_language` ('pt'/'en') adds a short
+        system instruction right after it."""
 
     @abstractmethod
     def complete(self) -> Turn:
@@ -67,8 +76,11 @@ class AnthropicSession(ChatSession):
         self.messages: list[dict] = []
         self.usage = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
 
-    def add_user_message(self, text: str) -> None:
+    def add_user_message(self, text: str, reply_language: str | None = None) -> None:
         self.messages.append({"role": "user", "content": text})
+        if reply_language:
+            # Mid-conversation system message (supported by the Claude 5.5 models).
+            self.messages.append({"role": "system", "content": language_hint(reply_language)})
 
     def complete(self) -> Turn:
         response = self.client.messages.create(
@@ -143,8 +155,10 @@ class OllamaSession(ChatSession):
         self.messages: list[dict] = [{"role": "system", "content": system}]
         self.usage = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
 
-    def add_user_message(self, text: str) -> None:
+    def add_user_message(self, text: str, reply_language: str | None = None) -> None:
         self.messages.append({"role": "user", "content": text})
+        if reply_language:
+            self.messages.append({"role": "system", "content": language_hint(reply_language)})
 
     def complete(self) -> Turn:
         response = self.client.chat(

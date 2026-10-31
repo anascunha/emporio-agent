@@ -3,17 +3,7 @@
 from __future__ import annotations
 
 from emporio.agent import Reply
-from emporio.text import fold, tokens
-
-PT_WORDS = {"voce", "nao", "para", "com", "uma", "que", "esta", "temos", "loja", "seu", "sua", "por", "pode", "tem"}
-EN_WORDS = {"you", "the", "and", "for", "with", "can", "is", "your", "we", "have", "store", "it", "this", "of"}
-
-
-def detect_language(text: str) -> str:
-    words = tokens(text)
-    pt = sum(w in PT_WORDS for w in words)
-    en = sum(w in EN_WORDS for w in words)
-    return "en" if en > pt else "pt"
+from emporio.text import detect_language, fold
 
 
 def check_turn(spec: dict, reply: Reply) -> list[dict]:
