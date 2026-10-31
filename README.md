@@ -4,15 +4,64 @@ Python prototype of a text-message customer-service agent for *Empório da Músi
 
 The agent — **Mel** — uses **function calling** over a small set of deterministic tools. It decides when to look up **store data** (catalog, prices, promotions, stock, orders) and when to read the **policy manual** (address, hours, payment, returns, shipping, warranty), declines what is out of scope, and answers in the customer's language (Portuguese or English).
 
+```mermaid
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
+flowchart LR
+    C([🧑 Customer]) <--> UI["CLI / Streamlit"]
+    UI <--> A{{"Agent loop<br/>(agent.py)"}}
+    A <-->|"history + tool schemas<br/>⇄ text or tool calls"| LLM["🧠 LLM<br/>Claude Sonnet 5.5<br/>or local Ollama"]
+    A <-->|"tool calls ⇄ JSON results"| T["ToolExecutor<br/>(tools.py)"]
+
+    subgraph data ["Store data: what is true"]
+        direction TB
+        S1["search_products<br/>get_product_details"]
+        S2["get_order_status<br/>check_return_options"]
+        D[("store.py<br/>CSVs + business rules")]
+        S1 --> D
+        S2 -->|"order no. + e-mail/phone<br/>verified in code"| D
+    end
+
+    subgraph rules ["Store policies: what is allowed"]
+        direction TB
+        S3["get_policy(topic)"]
+        P[("policies.py<br/>manual by section")]
+        S3 --> P
+    end
+
+    S4["escalate_to_human"] --> R[("escalations.jsonl<br/>protocol number")]
+
+    T --> S1 & S2
+    T --> S3
+    T --> S4
 ```
-customer ──► CLI / Streamlit ──► Agent loop ──► LLM (Claude Sonnet 5.5 by default, or local Ollama)
-                                     │   ▲              │ tool calls
-                                     ▼   └──────────────┘ tool results (JSON)
-                                 ToolExecutor
-   ┌──────────────┬───────────────────┬──────────────────┬────────────────────┬────────────┬───────────────────┐
-search_products  get_product_details  get_order_status  check_return_options  get_policy  escalate_to_human
-   └──────── store.py (CSVs + business rules) ───────────┘                        │             │
-                                                                     policies.py (manual)   data/runtime/*.jsonl
+
+How one message flows, using the non-trivial return case from the examples:
+
+```mermaid
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
+sequenceDiagram
+    actor C as Customer
+    participant A as Agent loop
+    participant L as LLM
+    participant T as Tools (code)
+
+    C->>A: "Order 7, phone (67) 99789-0123. Can I return it?"
+    A->>L: history + tool schemas
+    L-->>A: call check_return_options(7, phone, "regret")
+    A->>T: run tool
+    Note over T: verify phone ↔ order 7<br/>received ≈ 2026-02-17 → 34 days<br/>regret window = 7 days → expired
+    T-->>A: {"outcome": "deadline_expired", "still_possible": "legal warranty…"}
+    A->>L: tool result
+    L-->>A: text answer
+    A-->>C: "The 7-day window has passed 😕 but if it's defective,<br/>the 90-day legal warranty still applies…"
 ```
 
 ## How to run
