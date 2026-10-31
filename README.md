@@ -64,6 +64,8 @@ sequenceDiagram
     A-->>C: "The 7-day window has passed 😕 but if it's defective,<br/>the 90-day legal warranty still applies…"
 ```
 
+> **Store team?** The non-technical [User Guide](docs/USER_GUIDE.md) explains how Mel works and gives a hands-on test checklist.
+
 ## How to run
 
 Requirements: [uv](https://docs.astral.sh/uv/) (it installs Python 3.11+ if needed), and either an [Anthropic API key](https://console.anthropic.com) or [Ollama](https://ollama.com) installed locally.
@@ -83,7 +85,7 @@ uv run python -m emporio --provider ollama --model qwen2.5:3b
 uv run streamlit run streamlit_app.py
 ```
 
-Without uv: `python -m venv .venv && source .venv/bin/activate && pip install -e . streamlit pytest`, then drop the `uv run` prefix.
+Without uv (Python 3.11+): `python -m venv .venv && source .venv/bin/activate && pip install -e . "streamlit>=1.66" pytest`, then drop the `uv run` prefix.
 
 Using Ollama instead of Claude: `ollama pull qwen2.5:3b` (or any model with tool support) and set `LLM_PROVIDER=ollama`.
 
@@ -98,7 +100,7 @@ Using Ollama instead of Claude: `ollama pull qwen2.5:3b` (or any model with tool
 Other commands:
 
 ```bash
-uv run pytest                            # 58 tests, no network or LLM needed (< 3 s)
+uv run pytest                            # 66 tests, no network or LLM needed (< 3 s)
 uv run python -m evals.run               # model comparison → evals/results/<timestamp>.md
 uv run python -m evals.language_probe    # language-drift experiment (see Model evaluation)
 uv run python scripts/generate_examples.py   # regenerates examples/*.md with the configured model
@@ -220,5 +222,6 @@ scripts/           example generation
 examples/          example conversations
 data/              provided CSVs and manual (+ Markdown transcription)
 docs/decisions.md  decision log
-tests/             58 tests
+docs/USER_GUIDE.md guide for the store team (how it works, how to test)
+tests/             66 tests
 ```
