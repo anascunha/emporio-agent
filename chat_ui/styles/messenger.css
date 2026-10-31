@@ -1,0 +1,43 @@
+/* Mobile-messenger skin: phone frame, colored header, patterned background.
+   Inspired by common messaging apps; no third-party logos or assets. */
+
+.st-key-msgr-frame {
+  max-width: 400px; margin: 0 auto; border: 10px solid var(--frame); border-radius: 36px;
+  overflow: hidden; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25); background: var(--bg);
+}
+.msgr-header { background: var(--header); color: var(--header-text); padding-top: 14px; }
+.msgr-header .avatar { background: #dfe5e7; color: #54656f; }
+.msgr-header .status.typing-status { font-style: italic; }
+
+.st-key-msgr-msgs {
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dots) 1px, transparent 1px);
+  background-size: 18px 18px;
+  padding: 8px 10px;
+}
+
+[class*="st-key-msgr-bubble-"] {
+  background: var(--in-bg); color: var(--text); border-radius: 8px;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+}
+[class*="st-key-msgr-bubble-bot-"] { border-top-left-radius: 0; }
+[class*="st-key-msgr-bubble-user-"] { background: var(--out-bg); border-top-right-radius: 0; }
+
+.msgr-day { align-self: center; margin: 4px auto; }
+.msgr-day span {
+  background: var(--chip-bg); color: var(--meta); font-size: 11px; padding: 4px 10px;
+  border-radius: 7px; box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+}
+.msgr-notice { background: var(--notice-bg); color: var(--meta); }
+.st-key-msgr-msgs .typing { background: var(--in-bg); }
+
+.st-key-msgr-input { background: var(--input-bg); padding: 6px 8px; }
+.st-key-msgr-input [data-testid="stChatInput"] { border-radius: 24px; background: var(--field-bg); }
+.st-key-msgr-input [data-testid="stChatInput"] textarea { color: var(--text); }
+.st-key-msgr-input [data-testid="stChatInputSubmitButton"] {
+  background: var(--send); color: #fff; border-radius: 50%;
+}
+
+@media (max-width: 480px) {
+  .st-key-msgr-frame { border: none; border-radius: 0; box-shadow: none; max-width: 100%; }
+}

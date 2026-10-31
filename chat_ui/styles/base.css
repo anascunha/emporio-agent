@@ -1,0 +1,48 @@
+/* Shared chat layout. Streamlit adds a "st-key-<key>" class to keyed containers. */
+
+[class*="-bubble-"] {
+  max-width: 82%;
+  padding: 6px 10px 4px;
+  overflow-x: auto;
+  word-wrap: break-word;
+}
+[class*="-bubble-"] [data-testid="stMarkdownContainer"] :is(p, li, strong, em, code, h1, h2, h3, h4, span) {
+  color: inherit;
+}
+[class*="-bubble-"] [data-testid="stMarkdownContainer"] :is(p, li) { font-size: 0.95rem; line-height: 1.4; }
+[class*="-bubble-"] [data-testid="stMarkdownContainer"] :is(h1, h2, h3, h4) { font-size: 1rem; padding: 0.2rem 0; }
+[class*="-bubble-"] [data-testid="stMarkdownContainer"] p:last-child { margin-bottom: 0; }
+[class*="-bubble-"] [data-testid="stMarkdownContainer"] ul { margin-bottom: 0.25rem; padding-left: 1.1rem; }
+[class*="-bubble-"] [data-testid="stHeaderActionElements"] { display: none; }
+
+.msg-meta { font-size: 11px; text-align: right; margin-top: -2px; color: var(--meta); white-space: nowrap; }
+.tick { letter-spacing: -3px; margin-left: 3px; }
+.tick.read { color: var(--tick-read); }
+
+.chat-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
+.chat-header .avatar {
+  width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+.chat-header .name { font-weight: 600; font-size: 15px; line-height: 1.2; }
+.chat-header .status { font-size: 12px; opacity: 0.85; }
+
+.chat-notice {
+  align-self: center; text-align: center; font-size: 12px; padding: 5px 10px;
+  border-radius: 8px; margin: 2px auto; max-width: 85%;
+}
+
+/* "typing…" bubble: three dots animated with CSS only */
+.typing { display: inline-flex; gap: 4px; padding: 10px 12px; border-radius: 12px; }
+.typing span {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--meta);
+  animation: typing-blink 1.2s infinite ease-in-out;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-blink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+
+/* Tool calls: a developer note, visually distinct from chat bubbles */
+[class*="-tools-"] { max-width: 85%; }
+[class*="-tools-"] details { border: 1px dashed var(--meta) !important; border-radius: 8px; }
+[class*="-tools-"] summary p { font-family: ui-monospace, monospace; font-size: 12px; }
