@@ -14,7 +14,7 @@ from datetime import date
 from difflib import SequenceMatcher
 from pathlib import Path
 
-from .text import digits, fold, tokens
+from .text import digits, fold, stem, tokens
 
 PIX_DISCOUNT = 0.05
 COMBINED_PAYMENT_MIN = 2000.00
@@ -40,6 +40,24 @@ PAYMENT_METHODS = {
 
 # Brands that appear in the catalog, plus Tama (only mentioned in a description).
 # Used to detect descriptions that talk about a different product.
+# Extra words a customer may use for each category, in Portuguese and English. The data
+# is in Portuguese only, so without these "acoustic guitar" would match electric guitars.
+CATEGORY_SYNONYMS = {
+    "Guitarras": "guitarra eletrica electric guitar",
+    "Baixos": "baixo contrabaixo bass",
+    "Baterias e Percussão": "bateria percussao drum drums kit",
+    "Teclados e Pianos": "teclado piano sintetizador keyboard synth synthesizer",
+    "Violões": "violao acustico acoustic classical folk guitar",
+    "Instrumentos de Sopro (Madeiras)": "sopro madeira flauta clarinete saxofone wind woodwind flute sax",
+    "Instrumentos de Sopro (Metais)": "sopro metal trompete trombone tuba wind brass trumpet",
+    "Cordas Orquestrais": "violino viola violoncelo cello violin orchestral",
+    "Ukuleles": "ukulele uke",
+}
+
+# Results scoring below this fraction of the best match are dropped, so "acoustic
+# guitar" returns acoustic guitars and not every product that matches only "guitar".
+RELATIVE_SCORE_CUTOFF = 0.6
+
 KNOWN_BRANDS = {
     "yamaha", "tagima", "giannini", "rozini", "shelby", "crafter", "takamine",
     "martin", "taylor", "kala", "ohana", "kalani", "fender", "gibson", "ibanez",
@@ -255,6 +273,9 @@ class Store:
             score = _match_score(query, product) if query else 1.0
             if score > 0:
                 results.append((score, product))
+        if results:
+            best = max(score for score, _ in results)
+            results = [(s, p) for s, p in results if s >= best * RELATIVE_SCORE_CUTOFF]
         results.sort(key=lambda sp: (-sp[0], self.pricing(sp[1])["final_price"]))
         return [p for _, p in results[:limit]]
 
@@ -281,18 +302,33 @@ class Store:
 
 
 def _match_score(query: str, product: Product) -> float:
-    """Fraction of query words found in the product's name, category or specs."""
-    haystack = set(
-        tokens(" ".join([product.name, product.category, *map(str, product.specs.values())]))
+    """Fraction of query words found in the product's name, category or specs.
+
+    Words are compared without accents and in singular form, so "violão", "violao" and
+    "violões" all match the category "Violões".
+    """
+    text = " ".join(
+        [product.name, product.category, CATEGORY_SYNONYMS.get(product.category, ""),
+         *map(str, product.specs.values())]
     )
-    words = [w for w in tokens(query) if len(w) > 1]
+    haystack = {stem(t) for t in tokens(text)}
+    words = [stem(w) for w in tokens(query) if len(w) > 1]
     if not words:
         return 1.0
     hits = 0.0
     for word in words:
-        stem = word.rstrip("s") if len(word) > 3 else word
-        if any(h == word or h.startswith(stem) for h in haystack):
+        if any(h == word or _is_prefix(word, h) for h in haystack):
             hits += 1
-        elif any(SequenceMatcher(None, word, h).ratio() >= 0.8 for h in haystack):
+        elif len(word) >= 4 and any(
+            len(h) >= 4 and SequenceMatcher(None, word, h).ratio() >= 0.8 for h in haystack
+        ):
             hits += 0.8  # tolerate small typos ("takamini", "yamha")
     return hits / len(words)
+
+
+def _is_prefix(word: str, candidate: str) -> bool:
+    """Partial words count ("guitar" -> "guitarra", "strat" -> "stratocaster"), but short
+    ones must nearly complete the word: "aco" must not match "acoustic", "bass" not "basswood"."""
+    if len(word) < 4 or not candidate.startswith(word):
+        return False
+    return len(word) >= 5 or len(candidate) - len(word) <= 3

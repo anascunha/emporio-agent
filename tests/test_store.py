@@ -121,3 +121,33 @@ def test_order_items_are_loaded(store):
 def test_brl_formatting():
     assert brl(1967.18) == "R$ 1.967,18"
     assert brl(599.9) == "R$ 599,90"
+
+
+# ----- Portuguese morphology and English vocabulary (data is Portuguese only) --------
+
+
+def test_singular_plural_and_accents_match_the_same_products(store):
+    expected = {p.id for p in store.search_products(query="violões", limit=100)}
+    assert expected
+    for query in ["violão", "violao", "violoes", "VIOLÃO"]:
+        assert {p.id for p in store.search_products(query=query, limit=100)} == expected
+
+
+def test_english_terms_map_to_portuguese_categories(store):
+    def categories(query):
+        return {p.category for p in store.search_products(query=query, limit=100)}
+
+    assert categories("acoustic guitar") == {"Violões"}
+    assert categories("bass") == {"Baixos"}
+    assert categories("drums") == {"Baterias e Percussão"}
+    assert categories("keyboard") == {"Teclados e Pianos"}
+
+
+def test_short_words_do_not_match_as_prefixes(store):
+    # "aço" must not match "acoustic"; "bass" must not match "basswood" (a guitar body).
+    assert all("Aço" in p.name for p in store.search_products(query="violão aço", limit=100))
+    assert all(p.category == "Baixos" for p in store.search_products(query="bass", limit=100))
+
+
+def test_partial_model_names_still_match(store):
+    assert store.search_products(query="strat")[0].name.startswith("Fender Stratocaster")
