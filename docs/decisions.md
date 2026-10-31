@@ -30,3 +30,14 @@ Legend: **Ana** = my decision · **Claude → Ana** = option proposed by Claude 
 | 15 | The same answer for "order not found" and "contact does not match" | Claude | Does not reveal which order numbers exist. |
 | 16 | The policy PDF is **transcribed by hand to Markdown** (`data/politicas_da_loja.md`, kept in Portuguese) instead of parsed at runtime | Claude | Automatic extraction outputs one word per line and loses every table (payment, hours, shipping). The source text is unchanged. |
 | 17 | Manual contradictions get a fixed **clarification note** appended to the topic: both phone numbers given with their purpose; e-mail without the accent; item 3.1 prevails for installments; wind/orchestral instruments are mentioned but not in the catalog | Claude | The agent must apply the same interpretation every time instead of picking one at random. |
+
+## 2026-10-31 — Tools
+
+| # | Decision | Who | Why |
+|---|---|---|---|
+| 18 | **Six tools**: `search_products`, `get_product_details`, `get_order_status`, `check_return_options`, `get_policy`, `escalate_to_human` | Claude → Ana | One tool per kind of question in the challenge; few enough for a small local model to choose correctly. |
+| 19 | Tool results carry **prices already formatted** (`R$ 1.967,18`) and installment options precomputed | Claude | The LLM only explains numbers, never calculates them. |
+| 20 | Tool errors are **returned to the model** as JSON instead of raised | Claude | The model can recover (e.g. ask the customer for the missing e-mail) instead of the conversation crashing. |
+| 21 | Defect exchanges count **30 days from purchase** (4.2); the legal warranty counts **90 days from receipt** (8.1) | Claude | That is literally what each section says; it creates the non-trivial case where a store exchange has expired but the legal warranty still applies. |
+| 22 | Failed order verifications are **locked after 5 attempts** per conversation | Claude | Prevents enumerating orders by trying e-mails/phones. |
+| 23 | Escalations are appended to `data/runtime/escalations.jsonl` (git-ignored) with a protocol number | Claude | Simulates handing the case to the team (manual 7.3: complaints get a reply within 24 business hours). |
