@@ -73,3 +73,9 @@ First local run (qwen2.5:3b on a GTX 1650): price question answered correctly vi
 | 41 | **Per-message language hint:** the customer's language is detected in code (stopword count, ignoring e-mails/URLs; messages without a signal keep the conversation's language) and a one-line system message ("reply in English") is added right after each customer message | Ana → Claude | Ana asked whether the Portuguese base caused the English failure. Experiment (`evals/results/language-probe.md`): Haiku answered English speakers in Portuguese 13/15 times — even after a one-line catalog result; a system-prompt reminder only brought it to 9/15; the per-message hint brought it to **0/15**. |
 | 42 | **uv as the project manager**: dependency groups (`ui`, `dev`) installed by default, `uv.lock` committed, commands run with `uv run` | Ana | Faster installs and, above all, reproducibility: reviewers get exactly the versions that were tested, with one command (`uv sync`). pytest stays as the test runner (uv manages environments, it does not run tests). |
 | 43 | Evaluation run 3 (final code) **stopped mid-run: the API account ran out of credits** during the judge. The console log kept the code-check results: **Sonnet, Haiku and Opus 16/16** (Haiku's English case now passes); judge scores, latency and cost were lost. The runner now **saves after every model** and **continues without the judge** if it fails | Claude | A long paid run must not lose its results to one failure. |
+
+## 2026-10-31 — Web interface
+
+| # | Decision | Who | Why |
+|---|---|---|---|
+| 44 | **Python ≥ 3.11 / Streamlit ≥ 1.66** | Claude → Ana | Python 3.10 reached end of life in October 2026 (same reasoning as #7), and with 3.10 the lock resolved Streamlit 1.65, which lacks APIs the new chat UI uses. |

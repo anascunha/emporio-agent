@@ -66,7 +66,7 @@ sequenceDiagram
 
 ## How to run
 
-Requirements: [uv](https://docs.astral.sh/uv/) (it installs Python 3.10+ if needed), and either an [Anthropic API key](https://console.anthropic.com) or [Ollama](https://ollama.com) installed locally.
+Requirements: [uv](https://docs.astral.sh/uv/) (it installs Python 3.11+ if needed), and either an [Anthropic API key](https://console.anthropic.com) or [Ollama](https://ollama.com) installed locally.
 
 ```bash
 # 1. environment: creates .venv with the exact versions in uv.lock
