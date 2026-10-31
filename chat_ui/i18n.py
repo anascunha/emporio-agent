@@ -6,7 +6,8 @@ customer message, whatever the interface language is.
 
 from __future__ import annotations
 
-LANGUAGES = {"en": "🇬🇧 English", "pt": "🇧🇷 Português"}
+# Plain labels: flag emoji render as "GB"/"BR" letters on Windows.
+LANGUAGES = {"en": "English", "pt": "Português"}
 
 TEXT: dict[str, dict] = {
     "en": {

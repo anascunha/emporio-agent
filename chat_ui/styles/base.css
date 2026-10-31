@@ -17,6 +17,9 @@
   color: var(--in-text);
 }
 [class*="-bubble-user-"] { background: var(--out-bg); color: var(--out-text); }
+/* Streamlit gives the markdown container margin-bottom: -1rem to offset the gap between
+   elements; inside a bubble (no gap) that made the last line spill out of the bubble. */
+[class*="-bubble-"] [data-testid="stMarkdownContainer"] { margin-bottom: 0 !important; }
 [class*="-bubble-"] [data-testid="stMarkdownContainer"] :is(p, li, strong, em, code, h1, h2, h3, h4, span) {
   color: inherit;
 }
