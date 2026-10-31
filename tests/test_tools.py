@@ -85,7 +85,12 @@ def test_verification_locks_after_repeated_failures(tools):
 
 
 def test_missing_arguments_return_an_error_instead_of_raising(tools):
-    assert "Invalid arguments" in call(tools, "get_order_status", order_id=1)["error"]
+    assert "Missing: contact" in call(tools, "get_order_status", order_id=1)["error"]
+
+
+def test_null_arguments_are_treated_as_missing(tools):
+    # Found by the evaluation: qwen2.5:3b sent contact=null and the executor crashed.
+    assert "Missing: contact" in call(tools, "get_order_status", order_id=8, contact=None)["error"]
 
 
 # ----- returns (manual sections 4 and 8) ---------------------------------------------

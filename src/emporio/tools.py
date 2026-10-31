@@ -147,13 +147,20 @@ class ToolExecutor:
         """Run a tool and return its JSON result. Errors are returned, not raised, so
         the model can read them and recover (e.g. ask the customer for missing data)."""
         handler = getattr(self, f"_tool_{name}", None)
+        # Small models sometimes send null for arguments they do not have: treat as missing.
+        arguments = {k: v for k, v in (arguments or {}).items() if v is not None}
         if handler is None:
             result: dict[str, Any] = {"error": f"Unknown tool {name!r}."}
         else:
             try:
                 result = handler(**arguments)
-            except TypeError as exc:
-                result = {"error": f"Invalid arguments for {name}: {exc}"}
+            except TypeError:
+                required = next(s for s in self.schemas if s["name"] == name)["parameters"].get("required", [])
+                missing = [r for r in required if r not in arguments]
+                result = {
+                    "error": f"Invalid arguments for {name}."
+                    + (f" Missing: {', '.join(missing)}. Ask the customer for it; never guess." if missing else "")
+                }
             except (KeyError, ValueError) as exc:
                 result = {"error": str(exc)}
         return json.dumps(result, ensure_ascii=False)
