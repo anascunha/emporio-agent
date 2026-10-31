@@ -22,3 +22,19 @@ detected language, removed the drift entirely.
 
 Earlier run with an extra reminder at the end of the system prompt instead of the
 per-message hint: 9/15 answers still in Portuguese (vs. 13/15 without it).
+
+## Follow-up: local model (qwen2.5:3b via Ollama), customer switches language mid-conversation
+
+Reported by Ana while testing the UI: after a Portuguese message, an English message was still
+answered in Portuguese. Scenario: "Oi! Vocês abrem no sábado?" then "Ok, and how much is the
+Yamaha F310? Can I pay in installments?" (the second message is detected as English).
+
+| Where the language hint goes | Answered in English | Notes |
+|---|---|---|
+| System message after the customer message (what works for Claude) | 0/3 | |
+| System message **and** inside the customer message | 0/5 | qwen stopped calling tools and **invented prices** (R$ 2.995, R$ 949,50…) |
+| Inside the customer message only | **4/5** (earlier spot check: 2/3) | tools called every time; one wrong "unavailable" answer |
+
+Conclusion: the hint placement is provider-specific. Claude follows a mid-conversation system
+message; qwen2.5:3b's chat template handles it badly, so for Ollama the hint is appended to the
+customer's message.

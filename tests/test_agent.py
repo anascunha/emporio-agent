@@ -174,3 +174,10 @@ def test_anthropic_language_hint_is_a_system_message_after_the_user_turn():
     sent = messages.requests[0]["messages"]
     assert sent[0] == {"role": "user", "content": "Hi there"}
     assert sent[1]["role"] == "system" and "English" in sent[1]["content"]
+
+
+def test_ollama_language_hint_goes_inside_the_user_message():
+    session = OllamaSession("m", "system", [SCHEMA], host="", client=FakeOllama([]))
+    session.add_user_message("How much is it?", "en")
+    assert [m["role"] for m in session.messages] == ["system", "user"]
+    assert session.messages[-1]["content"].endswith("reply in English.)")

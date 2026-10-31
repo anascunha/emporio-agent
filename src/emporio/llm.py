@@ -156,9 +156,12 @@ class OllamaSession(ChatSession):
         self.usage = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
 
     def add_user_message(self, text: str, reply_language: str | None = None) -> None:
-        self.messages.append({"role": "user", "content": text})
+        # Small local models ignore (and get confused by) a system message in the middle
+        # of the conversation: with qwen2.5:3b it skipped tools and invented prices. The
+        # hint goes inside the customer's message instead (see docs/decisions.md).
         if reply_language:
-            self.messages.append({"role": "system", "content": language_hint(reply_language)})
+            text = f"{text}\n\n({language_hint(reply_language)})"
+        self.messages.append({"role": "user", "content": text})
 
     def complete(self) -> Turn:
         response = self.client.chat(
