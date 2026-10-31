@@ -1,4 +1,5 @@
-/* Shared chat layout. Streamlit adds a "st-key-<key>" class to keyed containers. */
+/* Shared chat layout. Streamlit adds a "st-key-KEY" class to keyed containers.
+   Never write a less-than sign in these files: the HTML sanitizer drops the whole style block. */
 
 [class*="-bubble-"] {
   max-width: 82%;

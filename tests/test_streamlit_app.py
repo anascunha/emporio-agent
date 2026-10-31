@@ -109,3 +109,10 @@ def test_md_escape_and_no_trademark_in_skins():
     assert md_escape("R$ 1 e R$ 2") == r"R\$ 1 e R\$ 2"
     for skin in SKINS.values():
         assert "whatsapp" not in repr(skin).lower()
+
+
+def test_css_files_have_no_less_than_sign():
+    # Streamlit sanitizes st.html with DOMPurify, which drops a whole <style> block whose
+    # text contains "<" followed by a letter. A "st-key-<key>" comment once disabled all CSS.
+    for css in (Path(__file__).resolve().parents[1] / "chat_ui" / "styles").glob("*.css"):
+        assert "<" not in css.read_text(encoding="utf-8"), css.name
