@@ -25,6 +25,7 @@ from .checks import check_turn
 from .judge import CRITERIA, JUDGE_MODEL, judge
 
 EVALS_DIR = Path(__file__).resolve().parent
+RESULTS_DIR = EVALS_DIR / "results"
 DEFAULT_MODELS = [
     "anthropic:claude-sonnet-5-5",
     "anthropic:claude-haiku-5-5",
@@ -180,6 +181,7 @@ def main() -> None:
     runs: dict[str, list[dict]] = {}
     summaries: dict[str, dict] = {}
     judge_usage = {"input": 0, "output": 0}
+    stamp = datetime.now().strftime("%Y-%m-%d-%H%M")
     for entry in args.models:
         provider, model = entry.split(":", 1)
         if provider == "anthropic" and not os.getenv("ANTHROPIC_API_KEY"):
@@ -190,24 +192,32 @@ def main() -> None:
         for case in cases:
             result = run_case(settings, provider, model, case)
             if judge_client and result["turns"]:
-                result["judge"], usage = judge(
-                    judge_client, case["description"], result["turns"], build_system_prompt(settings.today)
-                )
-                for key in judge_usage:
-                    judge_usage[key] += usage[key]
+                try:
+                    result["judge"], usage = judge(
+                        judge_client, case["description"], result["turns"], build_system_prompt(settings.today)
+                    )
+                    for key in judge_usage:
+                        judge_usage[key] += usage[key]
+                except Exception as exc:  # e.g. out of credits: keep the code checks, drop the judge
+                    print(f"  judge failed ({type(exc).__name__}): continuing without judge scores")
+                    judge_client = None
             print(f"  {'PASS' if result['passed'] else 'FAIL'}  {case['id']}")
             results.append(result)
         runs[entry] = results
         summaries[entry] = summarize(model, results)
+        # Save after every model, so a crash or an interrupted run keeps what was done.
+        save(stamp, runs, summaries, cases, judge_usage)
 
     if not runs:
         print("Nothing was run.")
         return
-    results_dir = EVALS_DIR / "results"
-    results_dir.mkdir(exist_ok=True)
-    stamp = datetime.now().strftime("%Y-%m-%d-%H%M")
-    write_report(results_dir / f"{stamp}.md", runs, summaries, cases)
-    (results_dir / f"{stamp}.json").write_text(
+    print(f"\nReport: {RESULTS_DIR / f'{stamp}.md'}")
+
+
+def save(stamp: str, runs: dict, summaries: dict, cases: list[dict], judge_usage: dict) -> None:
+    RESULTS_DIR.mkdir(exist_ok=True)
+    write_report(RESULTS_DIR / f"{stamp}.md", runs, summaries, cases)
+    (RESULTS_DIR / f"{stamp}.json").write_text(
         json.dumps(
             {
                 "summaries": summaries,
@@ -220,7 +230,6 @@ def main() -> None:
         ),
         encoding="utf-8",
     )
-    print(f"\nReport: {results_dir / f'{stamp}.md'}")
 
 
 if __name__ == "__main__":
