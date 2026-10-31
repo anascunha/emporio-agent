@@ -15,6 +15,7 @@ from chat_ui.skins import SKINS
 from chat_ui.state import (
     CHANNELS,
     ChatTurn,
+    explain_error,
     get_conversation,
     now_hhmm,
     pop_queued,
@@ -66,6 +67,9 @@ if st.session_state.get("config") != (provider, model):
 skin = SKINS[channel]
 conv = get_conversation(channel)
 inject_css(skin, is_dark(theme))
+
+if conv.turns and conv.turns[-1].error:
+    st.sidebar.error(explain_error(conv.turns[-1].error), icon="⚠️")
 
 if show_tools and conv.agent is not None:
     usage = conv.agent.session.usage

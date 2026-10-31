@@ -66,3 +66,17 @@ def now_hhmm() -> str:
 def md_escape(text: str) -> str:
     """Escape '$' so prices like 'R$ 1.000 ... R$ 2.000' are not rendered as LaTeX."""
     return text.replace("$", r"\$")
+
+
+def explain_error(error: str) -> str:
+    """Short developer-facing explanation of an agent error, with the fix."""
+    text = error.lower()
+    if "credit balance" in text:
+        return "Anthropic API account has no credits. Add credits in the Anthropic console or switch the provider to ollama."
+    if "authentication" in text or "api key" in text or "x-api-key" in text:
+        return "Anthropic API key missing or invalid. Set ANTHROPIC_API_KEY in .env and restart, or switch to ollama."
+    if "connect" in text and ("11434" in text or "ollama" in text):
+        return "Cannot reach Ollama. Start it (ollama serve) and pull the model, e.g. ollama pull qwen2.5:3b."
+    if "not found" in text and "model" in text:
+        return "Model not found. Check the model name, or pull it with ollama pull."
+    return error

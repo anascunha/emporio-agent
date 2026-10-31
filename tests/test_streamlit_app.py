@@ -103,6 +103,7 @@ def test_agent_errors_become_a_chat_notice(agents):
     at.chat_input(key="msgr-input").set_value("oi").run()
     assert not at.exception
     assert any("Não foi possível responder" in h.value for h in at.get("html"))
+    assert "no credits" in at.sidebar.error[0].value  # the developer sees the cause and the fix
 
 
 def test_md_escape_and_no_trademark_in_skins():
