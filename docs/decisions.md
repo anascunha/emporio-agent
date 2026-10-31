@@ -56,3 +56,12 @@ Legend: **Ana** = my decision · **Claude → Ana** = option proposed by Claude 
 
 First local run (qwen2.5:3b on a GTX 1650): price question answered correctly via `search_products`, but the opening-hours question was answered **without calling `get_policy`** (evasive answer), ~1 min per reply. Evidence for #2 and input for the evaluation.
 | 31 | Streamlit app in `streamlit_app.py` with provider/model selector and an optional **tool-call viewer** | Claude | Shows the agent's reasoning path (which tool, which arguments, what came back) during the interview demo. |
+
+## 2026-10-31 — Model evaluation
+
+| # | Decision | Who | Why |
+|---|---|---|---|
+| 32 | Build an **evaluation to choose the model** instead of picking by intuition | Ana | The model choice must be justified in the README with evidence. |
+| 33 | 16 cases (`evals/cases.json`) covering every challenge criterion: catalog, prices, promotions, stock, store info, orders with/without verification, the non-trivial return case, complaint, accessories, unrelated questions, prompt injection, English | Claude → Ana | One case per behavior the challenge asks for, plus the traps found in the data. |
+| 34 | Grading = **deterministic checks** (right tool, expected facts present, forbidden facts absent, answer language) **+ LLM-as-judge** (Claude Opus 5.5 scoring grounding, tone, helpfulness and policy adherence, 1–5) | Ana | Code checks are reproducible and free but blind to tone and hallucinations; the judge sees the tool results, so it can flag invented facts. |
+| 35 | The judge is skipped automatically when no API key is set; Claude models are skipped too | Claude | The evaluation still runs fully offline with Ollama models. |
