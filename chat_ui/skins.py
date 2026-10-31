@@ -1,8 +1,39 @@
-"""The two channel skins: everything that differs between them is data here + CSS."""
+"""The two channel skins: everything that differs between them is data here + CSS.
+
+Brand: dark navy as the base, orange as the accent, neutrals biased toward the navy.
+"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from urllib.parse import quote
+
+
+def staff_lines(color: str) -> str:
+    """CSS url() of a music-staff wallpaper tile (five lines), percent-encoded.
+
+    Encoded on purpose: a literal less-than sign would make the HTML sanitizer drop
+    the whole style block.
+    """
+    svg = (
+        "<svg xmlns='http://www.w3.org/2000/svg' width='40' height='112'>"
+        f"<path d='M0 24.5H40M0 32.5H40M0 40.5H40M0 48.5H40M0 56.5H40' stroke='{color}' stroke-width='1'/>"
+        "</svg>"
+    )
+    return f'url("data:image/svg+xml,{quote(svg)}")'
+
+
+# Shared brand tokens (light / dark).
+BRAND_LIGHT = {
+    "navy": "#13294B", "navy-2": "#1F3D6B", "orange": "#F26B1D", "orange-deep": "#C4500B",
+    "orange-soft": "#FFE6D3", "ink": "#1A2233", "muted": "#5F6B80", "line": "#DDE2EA",
+    "paper": "#F5F6F8", "surface": "#FFFFFF",
+}
+BRAND_DARK = {
+    "navy": "#0B1A33", "navy-2": "#1A3359", "orange": "#FF8A3D", "orange-deep": "#E06A1F",
+    "orange-soft": "#4A2A16", "ink": "#E7EBF2", "muted": "#97A3B9", "line": "#26324A",
+    "paper": "#0E1524", "surface": "#162036",
+}
 
 
 @dataclass(frozen=True)
@@ -35,23 +66,25 @@ MESSENGER = Skin(
     quick_replies=(),
     css_file="messenger.css",
     palette_light={
-        "header": "#008069", "header-text": "#ffffff", "bg": "#efeae2", "dots": "rgba(0,0,0,.07)",
-        "in-bg": "#ffffff", "out-bg": "#d9fdd3", "text": "#111b21", "meta": "#667781",
-        "tick-read": "#53bdeb", "input-bg": "#f0f2f5", "field-bg": "#ffffff", "send": "#00a884",
-        "chip-bg": "#ffffff", "notice-bg": "#ffeecd", "frame": "#1f2328",
+        **BRAND_LIGHT,
+        "wall": "#F3EEE8", "staff": staff_lines("rgba(19,41,75,0.08)"),
+        "in-bg": "#FFFFFF", "in-text": "#1A2233", "out-bg": "#FFE3CC", "out-text": "#2B1608",
+        "meta": "#7A8496", "tick-read": "#F26B1D", "field-bg": "#FFFFFF", "bar": "#ECE7E1",
+        "frame": "#0B1A33", "chip-bg": "#FFFFFF",
     },
     palette_dark={
-        "header": "#202c33", "header-text": "#e9edef", "bg": "#0b141a", "dots": "rgba(255,255,255,.04)",
-        "in-bg": "#202c33", "out-bg": "#005c4b", "text": "#e9edef", "meta": "#8696a0",
-        "tick-read": "#53bdeb", "input-bg": "#202c33", "field-bg": "#2a3942", "send": "#00a884",
-        "chip-bg": "#182229", "notice-bg": "#182229", "frame": "#000000",
+        **BRAND_DARK,
+        "wall": "#0F1726", "staff": staff_lines("rgba(231,235,242,0.06)"),
+        "in-bg": "#1C2A45", "in-text": "#E7EBF2", "out-bg": "#9A4512", "out-text": "#FFF3EA",
+        "meta": "#97A3B9", "tick-read": "#FF8A3D", "field-bg": "#1C2A45", "bar": "#121C30",
+        "frame": "#000000", "chip-bg": "#1C2A45",
     },
 )
 
 WEBSITE = Skin(
     key="web",
     label="💻 Website chat",
-    title="Mel · Assistente virtual",
+    title="Fale com a Mel",
     status_idle="Online agora",
     status_typing="Mel está digitando…",
     avatar="🎵",
@@ -70,14 +103,14 @@ WEBSITE = Skin(
     ),
     css_file="website.css",
     palette_light={
-        "brand": "#1B4F72", "brand-2": "#2E86C1", "accent": "#E67E22", "page": "#f4f6f9",
-        "bg": "#ffffff", "in-bg": "#F1F4F8", "in-text": "#1d2939", "out-bg": "#1B4F72",
-        "out-text": "#ffffff", "meta": "#667085", "border": "#e4e7ec", "field-bg": "#ffffff",
+        **BRAND_LIGHT,
+        "in-bg": "#EEF1F6", "in-text": "#1A2233", "out-bg": "#13294B", "out-text": "#FFFFFF",
+        "meta": "#6B7588", "field-bg": "#F5F6F8", "chip": "#1F3D6B", "chip-hover-text": "#FFFFFF",
     },
     palette_dark={
-        "brand": "#1B4F72", "brand-2": "#2E86C1", "accent": "#E67E22", "page": "#0e1117",
-        "bg": "#161b22", "in-bg": "#21262d", "in-text": "#e6edf3", "out-bg": "#2E86C1",
-        "out-text": "#ffffff", "meta": "#8b949e", "border": "#30363d", "field-bg": "#0d1117",
+        **BRAND_DARK,
+        "in-bg": "#1F2C47", "in-text": "#E7EBF2", "out-bg": "#2B4F86", "out-text": "#FFFFFF",
+        "meta": "#97A3B9", "field-bg": "#0E1524", "chip": "#FF8A3D", "chip-hover-text": "#1A1006",
     },
 )
 

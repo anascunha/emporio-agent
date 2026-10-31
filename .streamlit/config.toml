@@ -1,0 +1,6 @@
+# Brand accent for native Streamlit widgets (selected channel, toggle, buttons).
+[theme]
+primaryColor = "#F26B1D"
+
+[client]
+toolbarMode = "minimal"

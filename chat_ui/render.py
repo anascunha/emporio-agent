@@ -20,9 +20,15 @@ STYLES_DIR = Path(__file__).parent / "styles"
 TYPING_HTML = '<div class="typing" aria-label="typing"><span></span><span></span><span></span></div>'
 
 
-def inject_css(skin: Skin) -> None:
+def is_dark(theme_choice: str) -> bool:
+    """theme_choice: 'light', 'dark' or 'auto' (follow the browser/Streamlit theme)."""
+    if theme_choice in ("light", "dark"):
+        return theme_choice == "dark"
+    return getattr(st.context.theme, "type", None) == "dark"
+
+
+def inject_css(skin: Skin, dark: bool) -> None:
     """One style-only st.html call: palette variables + base CSS + the skin's CSS."""
-    dark = getattr(st.context.theme, "type", None) == "dark"
     palette = skin.palette_dark if dark else skin.palette_light
     variables = ";".join(f"--{name}:{value}" for name, value in palette.items())
     css = (STYLES_DIR / "base.css").read_text(encoding="utf-8")
@@ -32,7 +38,10 @@ def inject_css(skin: Skin) -> None:
 
 def header_html(skin: Skin, typing: bool) -> str:
     status = skin.status_typing if typing else skin.status_idle
-    return (
+    statusbar = (
+        '<div class="msgr-statusbar"><span>9:41</span><span>5G ▮▮▮ 87%</span></div>' if skin.key == "msgr" else ""
+    )
+    return statusbar + (
         f'<div class="chat-header {skin.key}-header">'
         f'<div class="avatar">{html.escape(skin.avatar)}</div>'
         f'<div class="who"><div class="name">{html.escape(skin.title)}</div>'

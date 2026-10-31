@@ -10,7 +10,7 @@ from time import perf_counter
 
 import streamlit as st
 
-from chat_ui.render import TYPING_HTML, header_html, inject_css, quick_replies, render_history
+from chat_ui.render import TYPING_HTML, header_html, inject_css, is_dark, quick_replies, render_history
 from chat_ui.skins import SKINS
 from chat_ui.state import (
     CHANNELS,
@@ -34,11 +34,20 @@ st.set_page_config(page_title="Empório da Música — Mel", page_icon="🎸", l
 settings = load_settings()
 
 # ----- developer sidebar ---------------------------------------------------------------
+THEMES = {"light": "☀️ Light", "dark": "🌙 Dark", "auto": "🖥️ Auto"}
+
 with st.sidebar:
     st.header("⚙️ Demo controls")
+    # ?channel=website opens a channel directly (handy for demo links)
+    requested = st.query_params.get("channel", "messenger")
     channel = st.segmented_control(
-        "Channel", CHANNELS, default="messenger", required=True,
-        format_func=lambda c: SKINS[c].label, key="channel",
+        "Channel", CHANNELS, default=requested if requested in CHANNELS else "messenger",
+        required=True, format_func=lambda c: SKINS[c].label, key="channel",
+    )
+    requested_theme = st.query_params.get("theme", "light")
+    theme = st.segmented_control(
+        "Theme", list(THEMES), default=requested_theme if requested_theme in THEMES else "light", required=True,
+        format_func=THEMES.get, key="theme",
     )
     providers = list(MODELS)
     provider = st.selectbox("Provider", providers, index=providers.index(settings.llm_provider))
@@ -56,7 +65,7 @@ if st.session_state.get("config") != (provider, model):
 
 skin = SKINS[channel]
 conv = get_conversation(channel)
-inject_css(skin)
+inject_css(skin, is_dark(theme))
 
 if show_tools and conv.agent is not None:
     usage = conv.agent.session.usage
@@ -66,15 +75,30 @@ if show_tools and conv.agent is not None:
     )
 
 # ----- customer view -------------------------------------------------------------------
-if channel == "website":
-    st.html(
-        '<div class="web-banner"><div><div class="brand">EMPÓRIO DA MÚSICA</div>'
-        '<div class="tagline">Sua música começa aqui.</div></div>'
-        '<nav><span class="active">Instrumentos</span><span>Promoções</span>'
-        "<span>A loja</span><span>Contato</span></nav></div>"
-    )
+WEB_HERO = """
+<div class="web-hero">
+  <div class="eyebrow">Campo Grande · MS · desde 2008</div>
+  <h1>Empório da Música</h1>
+  <div class="tagline">Sua música começa aqui.</div>
+  <div class="facts">
+    <div class="fact"><b>LOJA</b><span>Rua 14 de Maio, 3200 · Centro</span></div>
+    <div class="fact"><b>HORÁRIO</b><span>Seg a sex 9h às 18h · Sáb 9h às 13h</span></div>
+    <div class="fact"><b>PAGAMENTO</b><span>5% off no PIX · até 12x sem juros</span></div>
+    <div class="fact"><b>ENTREGA</b><span>Frete grátis acima de R$ 500 na Grande Campo Grande</span></div>
+  </div>
+  <div class="cta">Dúvidas sobre instrumentos, pedidos ou trocas? <strong>Fale com a Mel</strong>, nossa assistente virtual.</div>
+</div>
+"""
 
-with st.container(key=f"{skin.key}-frame", gap=None):
+if channel == "website":
+    hero_col, chat_col = st.columns([1.15, 1], gap="large", vertical_alignment="top")
+    with hero_col:
+        st.html(WEB_HERO)
+    chat_area = chat_col
+else:
+    chat_area = st.container()
+
+with chat_area, st.container(key=f"{skin.key}-frame", gap=None):
     header = st.empty()
     messages = st.container(key=f"{skin.key}-msgs", height=520, autoscroll=True, gap="small")
     chips = st.container(key=f"{skin.key}-chips", horizontal=True, wrap=True, gap="xsmall") if skin.quick_replies else None

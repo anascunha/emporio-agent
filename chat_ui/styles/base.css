@@ -1,49 +1,83 @@
 /* Shared chat layout. Streamlit adds a "st-key-KEY" class to keyed containers.
    Never write a less-than sign in these files: the HTML sanitizer drops the whole style block. */
 
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap");
+
+/* layout idea: navy chrome, orange accents, chat surfaces kept calm so the messages lead */
+.chat-shell, [class*="-bubble-"], .chat-header, .chat-notice, .web-hero {
+  font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.chat-header .name, .web-hero h1 { font-family: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif; }
+
 [class*="-bubble-"] {
   max-width: 82%;
-  padding: 6px 10px 4px;
-  overflow-x: auto;
-  word-wrap: break-word;
+  padding: 7px 11px 5px;
+  overflow-wrap: anywhere;
+  background: var(--in-bg);
+  color: var(--in-text);
 }
+[class*="-bubble-user-"] { background: var(--out-bg); color: var(--out-text); }
 [class*="-bubble-"] [data-testid="stMarkdownContainer"] :is(p, li, strong, em, code, h1, h2, h3, h4, span) {
   color: inherit;
 }
-[class*="-bubble-"] [data-testid="stMarkdownContainer"] :is(p, li) { font-size: 0.95rem; line-height: 1.4; }
+[class*="-bubble-"] [data-testid="stMarkdownContainer"] :is(p, li) { font-size: 0.94rem; line-height: 1.45; }
 [class*="-bubble-"] [data-testid="stMarkdownContainer"] :is(h1, h2, h3, h4) { font-size: 1rem; padding: 0.2rem 0; }
 [class*="-bubble-"] [data-testid="stMarkdownContainer"] p:last-child { margin-bottom: 0; }
 [class*="-bubble-"] [data-testid="stMarkdownContainer"] ul { margin-bottom: 0.25rem; padding-left: 1.1rem; }
+[class*="-bubble-"] [data-testid="stMarkdownContainer"] strong { font-weight: 700; }
 [class*="-bubble-"] [data-testid="stHeaderActionElements"] { display: none; }
+[class*="-bubble-"] :is(pre, table) { display: block; max-width: 100%; overflow-x: auto; }
 
-.msg-meta { font-size: 11px; text-align: right; margin-top: -2px; color: var(--meta); white-space: nowrap; }
-.tick { letter-spacing: -3px; margin-left: 3px; }
-.tick.read { color: var(--tick-read); }
-
-.chat-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
-.chat-header .avatar {
-  width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;
+.msg-meta {
+  font-size: 11px; text-align: right; margin-top: -1px; color: var(--meta);
+  white-space: nowrap; font-variant-numeric: tabular-nums;
 }
-.chat-header .name { font-weight: 600; font-size: 15px; line-height: 1.2; }
+[class*="-bubble-user-"] .msg-meta { color: inherit; opacity: 0.7; }
+.tick { letter-spacing: -3px; margin-left: 4px; }
+.tick.read { color: var(--tick-read); opacity: 1; font-weight: 700; }
+
+.chat-header { display: flex; align-items: center; gap: 11px; padding: 12px 16px; }
+.chat-header .avatar {
+  width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0;
+}
+.chat-header .name { font-weight: 700; font-size: 16px; line-height: 1.15; letter-spacing: 0.1px; }
 .chat-header .status { font-size: 12px; opacity: 0.85; }
 
 .chat-notice {
-  align-self: center; text-align: center; font-size: 12px; padding: 5px 10px;
-  border-radius: 8px; margin: 2px auto; max-width: 85%;
+  align-self: center; text-align: center; font-size: 12px; line-height: 1.4; padding: 6px 12px;
+  border-radius: 8px; margin: 2px auto; max-width: 85%; color: var(--meta);
 }
 
 /* "typing…" bubble: three dots animated with CSS only */
-.typing { display: inline-flex; gap: 4px; padding: 10px 12px; border-radius: 12px; }
+.typing { display: inline-flex; gap: 4px; padding: 11px 13px; border-radius: 14px; background: var(--in-bg); }
 .typing span {
-  width: 7px; height: 7px; border-radius: 50%; background: var(--meta);
+  width: 7px; height: 7px; border-radius: 50%; background: var(--orange);
   animation: typing-blink 1.2s infinite ease-in-out;
 }
 .typing span:nth-child(2) { animation-delay: 0.2s; }
 .typing span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes typing-blink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .typing span { animation: none; opacity: 0.7; } }
 
 /* Tool calls: a developer note, visually distinct from chat bubbles */
 [class*="-tools-"] { max-width: 85%; }
-[class*="-tools-"] details { border: 1px dashed var(--meta) !important; border-radius: 8px; }
-[class*="-tools-"] summary p { font-family: ui-monospace, monospace; font-size: 12px; }
+[class*="-tools-"] details { border: 1px dashed var(--muted) !important; border-radius: 8px; background: transparent; }
+[class*="-tools-"] summary p { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 12px; }
+
+/* Page chrome follows the light/dark choice from the sidebar (Streamlit's own theme
+   cannot be switched at runtime, so the app background and text use our tokens). */
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { background: var(--paper); color: var(--ink); }
+[data-testid="stSidebar"] { background: var(--surface); border-right: 1px solid var(--line); }
+[data-testid="stSidebar"] :is(h1, h2, h3), [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p { color: var(--ink); }
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p { color: var(--muted); }
+/* native sidebar controls repainted with the same tokens, so both themes stay legible */
+[data-testid="stSidebar"] button,
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
+  background: var(--paper); color: var(--ink); border-color: var(--line);
+}
+[data-testid="stSidebar"] button p, [data-testid="stSidebar"] [data-baseweb="select"] div { color: inherit; }
+[data-testid="stSidebar"] [data-testid="stBaseButton-segmented_controlActive"] {
+  background: var(--orange-soft); color: var(--orange-deep); border-color: var(--orange);
+}
+[data-testid="stSidebar"] [data-baseweb="select"] svg { fill: var(--muted); }
