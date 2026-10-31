@@ -57,7 +57,7 @@
       {
         "message": "Ainda tem o Shelby SN-7C de 7 cordas?",
         "expect_tools": ["search_products"],
-        "contains_any": ["descontinu", "nao faz mais parte", "fora de linha", "saiu do catalogo", "nao trabalhamos mais"],
+        "contains_any": ["descontinu", "nao faz mais parte", "fora de linha", "saiu de linha", "saiu do catalogo", "nao esta mais no nosso catalogo", "nao trabalhamos mais"],
         "language": "pt"
       }
     ]

@@ -19,6 +19,7 @@ from pathlib import Path
 
 from emporio.agent import create_agent
 from emporio.config import load_settings
+from emporio.prompts import build_system_prompt
 
 from .checks import check_turn
 from .judge import CRITERIA, JUDGE_MODEL, judge
@@ -189,7 +190,9 @@ def main() -> None:
         for case in cases:
             result = run_case(settings, provider, model, case)
             if judge_client and result["turns"]:
-                result["judge"], usage = judge(judge_client, case["description"], result["turns"])
+                result["judge"], usage = judge(
+                    judge_client, case["description"], result["turns"], build_system_prompt(settings.today)
+                )
                 for key in judge_usage:
                     judge_usage[key] += usage[key]
             print(f"  {'PASS' if result['passed'] else 'FAIL'}  {case['id']}")

@@ -16,7 +16,8 @@ Empório da Música (a musical-instrument store in Brazil). Score each criterion
 (very poor) to 5 (excellent):
 
 - grounding: every price, stock status, deadline, order detail and store rule in Mel's \
-answers is supported by the tool results shown. Invented or contradicted facts score 1.
+answers is supported by the tool results shown or by the store rules Mel was given \
+(provided below). Invented or contradicted facts score 1.
 - tone: informal but professional, warm, like a friend who knows music; not robotic; \
 answers in the customer's language.
 - helpfulness: answers what was asked, clearly and concisely, and offers a next step \
@@ -57,8 +58,14 @@ def render_conversation(turns: list[tuple[str, object]]) -> str:
     return "\n".join(lines)
 
 
-def judge(client, case_description: str, turns: list[tuple[str, object]]) -> tuple[dict, dict]:
-    """Return (scores, usage) for one conversation."""
+def judge(
+    client, case_description: str, turns: list[tuple[str, object]], agent_rules: str
+) -> tuple[dict, dict]:
+    """Return (scores, usage) for one conversation.
+
+    `agent_rules` is Mel's system prompt: facts stated there (e.g. the 24-business-hour
+    reply time) are legitimate and must not be graded as invented.
+    """
     response = client.messages.create(
         model=JUDGE_MODEL,
         max_tokens=4000,
@@ -66,7 +73,11 @@ def judge(client, case_description: str, turns: list[tuple[str, object]]) -> tup
         messages=[
             {
                 "role": "user",
-                "content": f"Scenario being tested: {case_description}\n\n{render_conversation(turns)}",
+                "content": (
+                    f"STORE RULES MEL WAS GIVEN (system prompt):\n{agent_rules}\n\n"
+                    f"SCENARIO BEING TESTED: {case_description}\n\n"
+                    f"CONVERSATION:\n{render_conversation(turns)}"
+                ),
             }
         ],
         output_config={"effort": "medium", "format": {"type": "json_schema", "schema": SCHEMA}},
