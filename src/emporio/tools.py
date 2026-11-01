@@ -197,13 +197,22 @@ class ToolExecutor:
         if query:
             # Unavailable products named by the customer are reported, so the agent can
             # say "out of stock / discontinued" and suggest alternatives (manual 7.3).
-            unavailable = [
-                p
-                for p in self.store.search_products(query, category, include_unavailable=True, limit=3)
-                if p.availability != "available"
-            ]
+            ranked = self.store.search_products(query, category, include_unavailable=True, limit=3)
+            unavailable = [p for p in ranked if p.availability != "available"]
             if unavailable:
                 result["unavailable_matches"] = [self._summary(p) for p in unavailable]
+            if ranked and ranked[0].availability != "available":
+                # The best match is the product the customer asked for and it cannot be
+                # bought: put it first so the reply starts with that (small models answer
+                # in the order they read).
+                result = {
+                    "requested_product": self._summary(ranked[0]),
+                    "how_to_answer": (
+                        f"First tell the customer that {ranked[0].name} is "
+                        f"{ranked[0].availability.replace('_', ' ')}; then offer the alternatives in 'products'."
+                    ),
+                    **result,
+                }
         if category and not any(p.category == category for p in self.store.products.values()):
             result["note"] = "No products in this category are listed in the system right now."
         if not found and "unavailable_matches" not in result:

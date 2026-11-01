@@ -164,3 +164,12 @@ def test_product_name_instead_of_id_explains_how_to_recover(tools):
     # raw Python error, told the customer the product did not exist.
     error = call(tools, "get_product_details", product_id="Takamine GD20")["error"]
     assert "search_products" in error and "Takamine GD20" in error
+
+
+def test_unavailable_requested_product_comes_first(tools):
+    # Manual test 5: with the out-of-stock product listed last, qwen offered an
+    # alternative before saying the requested guitar was unavailable.
+    result = call(tools, "search_products", query="Giannini GF-3D")
+    assert list(result)[:2] == ["requested_product", "how_to_answer"]
+    assert result["requested_product"]["availability"] == "out_of_stock"
+    assert "out of stock" in result["how_to_answer"]
