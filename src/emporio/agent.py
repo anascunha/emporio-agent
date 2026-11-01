@@ -16,10 +16,17 @@ from .tools import ToolExecutor
 # Upper bound on tool rounds per customer message, so a confused model cannot loop forever.
 MAX_TOOL_ROUNDS = 6
 
-FALLBACK_REPLY = (
-    "Desculpe, tive um problema para consultar essa informação agora. "
-    "Você pode tentar de novo ou falar com a nossa equipe pelo WhatsApp (67) 3321-4500."
-)
+# Shown when the model gets stuck; follows the language of the conversation.
+FALLBACK_REPLIES = {
+    "pt": (
+        "Desculpe, tive um problema para consultar essa informação agora. "
+        "Você pode tentar de novo ou falar com a nossa equipe pelo WhatsApp (67) 3321-4500."
+    ),
+    "en": (
+        "Sorry, I had trouble looking that up just now. "
+        "Please try again, or talk to our team on WhatsApp at (67) 3321-4500."
+    ),
+}
 
 
 @dataclass
@@ -53,14 +60,17 @@ class Agent:
         for _ in range(MAX_TOOL_ROUNDS):
             turn = self.session.complete()
             if not turn.tool_calls:
-                return Reply(turn.text or FALLBACK_REPLY, events)
+                return Reply(turn.text or self.fallback(), events)
             results = []
             for call in turn.tool_calls:
                 output = self.tools.execute(call.name, call.arguments)
                 events.append(ToolEvent(call.name, call.arguments, json.loads(output)))
                 results.append((call, output))
             self.session.add_tool_results(results)
-        return Reply(FALLBACK_REPLY, events)
+        return Reply(self.fallback(), events)
+
+    def fallback(self) -> str:
+        return FALLBACK_REPLIES["en" if self.language == "en" else "pt"]
 
 
 def create_agent(

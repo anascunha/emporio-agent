@@ -100,7 +100,10 @@ class AnthropicSession(ChatSession):
             ToolCall(b.id, b.name, dict(b.input)) for b in response.content if b.type == "tool_use"
         ]
         if response.stop_reason == "refusal" and not text:
-            text = "Desculpe, não consigo ajudar com isso. Posso ajudar com instrumentos ou pedidos?"
+            text = (  # the session does not know the customer's language: say it in both
+                "Sorry, I can't help with that. I can help with instruments or orders. / "
+                "Desculpe, não consigo ajudar com isso. Posso ajudar com instrumentos ou pedidos."
+            )
         return Turn(text, calls)
 
     def add_tool_results(self, results: list[tuple[ToolCall, str]]) -> None:

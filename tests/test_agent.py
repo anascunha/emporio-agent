@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from emporio.agent import FALLBACK_REPLY, MAX_TOOL_ROUNDS, Agent
+from emporio.agent import FALLBACK_REPLIES, MAX_TOOL_ROUNDS, Agent
 from emporio.config import DATA_DIR
 from emporio.llm import AnthropicSession, ChatSession, OllamaSession, ToolCall, Turn
 from emporio.policies import PolicyManual
@@ -60,7 +60,13 @@ def test_tool_call_then_answer(tools):
 def test_loop_stops_after_max_rounds(tools):
     looping = [Turn("", [ToolCall(str(i), "get_policy", {"topic": "payment"})]) for i in range(10)]
     reply = Agent(ScriptedSession(looping), tools).reply("?")
-    assert reply.text == FALLBACK_REPLY
+    assert reply.text == FALLBACK_REPLIES["pt"]  # no language signal: the store's language
+
+
+def test_fallback_follows_the_conversation_language(tools):
+    looping = [Turn("", [ToolCall(str(i), "get_policy", {"topic": "payment"})]) for i in range(10)]
+    reply = Agent(ScriptedSession(looping), tools).reply("Hi! How much is the Yamaha F310?")
+    assert reply.text == FALLBACK_REPLIES["en"]
     assert len(reply.tool_events) == MAX_TOOL_ROUNDS
 
 
