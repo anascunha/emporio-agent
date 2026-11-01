@@ -29,7 +29,7 @@ from emporio.config import load_settings
 
 MODELS = {
     "anthropic": ["claude-sonnet-5-5", "claude-haiku-5-5", "claude-opus-5-5"],
-    "ollama": ["qwen2.5:3b", "llama3.2"],
+    "ollama": ["qwen2.5:3b"],  # best local model in the evaluation (llama3.2 dropped, decision #62)
 }
 
 st.set_page_config(page_title="Empório da Música — Mel", page_icon="🎸", layout="wide")

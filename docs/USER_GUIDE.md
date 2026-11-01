@@ -229,7 +229,7 @@ All customer data is fictional, so it's fine to use it for testing.
 | **Error in the chat mentioning authentication or API key** | `ANTHROPIC_API_KEY` is missing or wrong in `.env`. Fix it and restart the app. |
 | **Error mentioning credit balance / billing** | Your Anthropic account is out of [credits](#11-glossary). Top up at console.anthropic.com, or switch to Ollama. |
 | **Error connecting to Ollama** | Make sure the Ollama app is running (or run `ollama serve`) and that the model is downloaded: `ollama pull qwen2.5:3b`. |
-| **"Model not found" on Ollama** | Pull the exact model name shown in the selector, e.g. `ollama pull llama3.2`. |
+| **"Model not found" on Ollama** | Pull the exact model name shown in the selector: `ollama pull qwen2.5:3b`. |
 | **Answers are very slow** | Normal for local models on ordinary computers (it can take up to about a minute). Use Claude for demos. |
 | **Mel replies "Sorry, I had trouble looking that up just now…"** (or the Portuguese version) | Her safety fallback when the model gets stuck. Ask again, or start a new conversation. Frequent with small local models. |
 | **"Port 8501 is already in use"** | Another copy is running. Close it, or start on another port: `uv run streamlit run streamlit_app.py --server.port 8502`. |

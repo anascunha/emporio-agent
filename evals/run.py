@@ -31,7 +31,6 @@ DEFAULT_MODELS = [
     "anthropic:claude-haiku-5-5",
     "anthropic:claude-opus-5-5",
     "ollama:qwen2.5:3b",
-    "ollama:llama3.2",
 ]
 
 # USD per million tokens: (input, output). Cache reads cost 10% of input, writes 125%.

@@ -180,7 +180,7 @@ Results (full report in `evals/results/`):
 | qwen2.5:3b (Ollama) | 9/16 | 3.1 | 2.6 | 2.6 | 3.4 | 6.1 s | free |
 | llama3.2 3B (Ollama) | 8/16 | 3.2 | 3.0 | 2.4 | 3.1 | 16.3 s | free |
 
-Judge scores are 1–5 averages; cost excludes the judge (about US$ 1.70 per full run).
+Judge scores are 1–5 averages; cost excludes the judge (about US$ 1.70 per full run). After manual testing, llama3.2 was removed from the web chat and from the default evaluation list (still available with `--models ollama:llama3.2`); qwen2.5:3b is the local option.
 
 How the evaluation changed the project (each step is a commit and a row in the decision log):
 
