@@ -114,6 +114,7 @@ All customer data is fictional, so it's fine to use it for testing.
   ✅ Lists several real models with prices, e.g. Tagima Memphis AC-39 (R$ 429,90), Rozini RC-104 (R$ 459,90), Yamaha F310 (R$ 699,90), Yamaha C70 (R$ 849,00). She may ask whether you prefer nylon or steel strings, because there are 12 matches.
   ❌ Must **not** offer the Giannini GF-3D (out of stock) or the Shelby SN-7C (discontinued).
   *Why:* she only offers what can actually be bought today.
+  ⚠️ With the small local model (Ollama, qwen2.5:3b), Mel may read "under" as a minimum price and list guitars above R$ 1.000. Known limitation of that model; the same question in Portuguese works.
 - [ ] **Price with an expired promotion.** Type: *"How much is the Takamine GD20?"*
   ✅ R$ 2.199,00, no discount (R$ 2.089,05 with PIX, or up to 12x R$ 183,25).
   *Why:* this guitar had a promotion in the past, but it's inactive. Mel must never promise an expired discount (manual 7.3).

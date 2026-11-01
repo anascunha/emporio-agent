@@ -162,7 +162,7 @@ The CSVs are used as provided. Inconsistencies are handled explicitly in code:
 
 ## Model evaluation
 
-`python -m evals.run` runs 16 scenario cases (`evals/cases.json`) against each model, each as a fresh conversation, and grades them two ways:
+`python -m evals.run` runs 17 scenario cases (`evals/cases.json`) against each model, each as a fresh conversation, and grades them two ways:
 
 - **Deterministic checks:** right tool called (or forbidden tool not called), expected facts present (e.g. `R$ 2.199`), forbidden facts absent (e.g. a PIX discount stacked on a promotion), answer in the customer's language.
 - **LLM-as-judge** (Claude Opus 5.5, structured output): grounding (are all facts supported by the tool results?), tone, helpfulness and policy adherence, 1–5 each.
@@ -198,6 +198,7 @@ The evaluation also found a crash (a local model sending `null` arguments) and A
 - The evaluation set is small (16 cases, one run per model): enough to compare models, not to measure small differences. The LLM judge can itself be biased; run 1 showed it (see above). The example conversations come from evaluation run 2, before the last search and language fixes.
 - Prompt-injection defense is the prompt plus tools that validate everything: the model cannot bypass identity checks or invent a price in a tool result, but it could still be talked into off-topic chat.
 - Product search is keyword-based: accents, Portuguese plurals, small typos and a short list of English category words are handled, but there is no semantic matching ("something for a beginner" relies on the model choosing filters).
+- **qwen2.5:3b reads "under R$ 1,000" as a minimum price** (5/5 in manual testing; [`docs/manual-tests.md`](docs/manual-tests.md)) and then lists more expensive guitars as "under". The same question in Portuguese works. Clearer parameter descriptions and renamed parameters did not help; evaluation case 17 measures it. Use Claude for customer-facing answers.
 - Language detection counts common Portuguese/English words: other languages are not detected, and very short messages keep the previous language. Small local models still answer in the wrong language about 1 time in 5.
 - Opening hours are not enforced in real time (the manual's after-hours message is not applied automatically).
 - Final-sale and customized items cannot be identified per order (the data has no such field); the agent states the rule and leaves the decision to the team.
@@ -248,5 +249,6 @@ examples/          example conversations + model comparison
 data/              provided CSVs and manual (+ Markdown transcription)
 docs/decisions.md  decision log
 docs/USER_GUIDE.md guide for the store team (how it works, how to test)
+docs/manual-tests.md  dialogs tested by hand before delivery
 tests/             68 tests
 ```

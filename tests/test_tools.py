@@ -147,3 +147,11 @@ def test_escalation_is_recorded_with_protocol(tools, tmp_path):
     assert result["protocol"].startswith("EM-20260323-")
     lines = (tmp_path / "escalations.jsonl").read_text(encoding="utf-8").splitlines()
     assert json.loads(lines[0])["protocol"] == result["protocol"]
+
+
+def test_price_filter_is_spelled_out_and_impossible_range_rejected(tools):
+    # Found in manual testing: qwen2.5:3b sent min_price=1000 for "under R$ 1,000".
+    result = call(tools, "search_products", category="Violões", min_price=1000)
+    assert result["price_filter_applied"] == "from R$ 1.000,00"
+    assert "up to R$ 1.000,00" == call(tools, "search_products", category="Violões", max_price=1000)["price_filter_applied"]
+    assert "min_price is greater" in call(tools, "search_products", min_price=1000, max_price=999.99)["error"]

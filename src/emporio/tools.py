@@ -44,8 +44,14 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
                     "description": "Catalog category (Portuguese name). Violões = acoustic/classical guitars; Guitarras = electric guitars.",
                     "enum": [],  # filled from the data at runtime
                 },
-                "min_price": {"type": "number", "description": "Minimum price in BRL."},
-                "max_price": {"type": "number", "description": "Maximum price in BRL."},
+                "min_price": {
+                    "type": "number",
+                    "description": "Lower price limit in BRL. Only for 'over', 'above', 'from', 'more than', 'acima de', 'a partir de'.",
+                },
+                "max_price": {
+                    "type": "number",
+                    "description": "Upper price limit in BRL. Use for 'under', 'up to', 'below', 'at most', 'até', 'no máximo', 'menos de'.",
+                },
             },
         },
     },
@@ -174,8 +180,15 @@ class ToolExecutor:
         min_price: float | None = None,
         max_price: float | None = None,
     ) -> dict:
+        if min_price is not None and max_price is not None and min_price > max_price:
+            return {"error": "min_price is greater than max_price. For 'under X' use only max_price=X."}
         found = self.store.search_products(query, category, min_price, max_price, limit=100)
         result: dict[str, Any] = {"products": [self._summary(p) for p in found[:SEARCH_LIMIT]]}
+        if min_price is not None or max_price is not None:
+            # Spell out the filter so the model cannot describe "from R$ 1.000" as "under".
+            bounds = [f"from {brl(min_price)}" if min_price is not None else "",
+                      f"up to {brl(max_price)}" if max_price is not None else ""]
+            result["price_filter_applied"] = " ".join(b for b in bounds if b)
         if len(found) > SEARCH_LIMIT:
             result["note"] = (
                 f"Showing the {SEARCH_LIMIT} best matches out of {len(found)}. "
