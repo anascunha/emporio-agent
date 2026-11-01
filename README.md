@@ -195,7 +195,7 @@ The evaluation also found a crash (a local model sending `null` arguments) and A
 ## Known limitations
 
 - **Quality depends on the model.** Small local models (3B) skip tools or answer from memory; the guards (validated arguments, errors returned to the model, 6-round cap, polite fallback) limit the damage but do not fix it.
-- The evaluation set is small (16 cases, one run per model): enough to compare models, not to measure small differences. The LLM judge can itself be biased; run 1 showed it (see above). The example conversations come from evaluation run 2, before the last search and language fixes.
+- The evaluation set is small (17 cases, one run per model; runs 1–3 used the first 16): enough to compare models, not to measure small differences. The LLM judge can itself be biased; run 1 showed it (see above). The example conversations come from evaluation run 2, before the last search and language fixes.
 - Prompt-injection defense is the prompt plus tools that validate everything: the model cannot bypass identity checks or invent a price in a tool result, but it could still be talked into off-topic chat.
 - Product search is keyword-based: accents, Portuguese plurals, small typos and a short list of English category words are handled, but there is no semantic matching ("something for a beginner" relies on the model choosing filters).
 - **qwen2.5:3b reads "under R$ 1,000" as a minimum price** (5/5 in manual testing; [`docs/manual-tests.md`](docs/manual-tests.md)) and then lists more expensive guitars as "under". The same question in Portuguese works. Clearer parameter descriptions and renamed parameters did not help; evaluation case 17 measures it. Use Claude for customer-facing answers.
