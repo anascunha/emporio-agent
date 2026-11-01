@@ -246,10 +246,12 @@ class ToolExecutor:
             summary["pix_price"] = "PIX 5% discount does not apply to promotional prices"
         else:
             summary["price"] = brl(pricing["final_price"])
-            summary["pix_price"] = brl(pricing["pix_price"])
+            summary["pix_price"] = f"{brl(pricing['pix_price'])} (paid at once via PIX, 5% off)"
         best = pricing["max_installments"]
         if best:
-            summary["max_installments"] = f"{best['installments']}x {brl(best['installment_value'])}"
+            summary["max_installments"] = (
+                f"{best['installments']}x {brl(best['installment_value'])} (credit card, interest-free, no PIX discount)"
+            )
         return summary
 
     def _alternatives(self, product: Product, limit: int = 3) -> list[Product]:

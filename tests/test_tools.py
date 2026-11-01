@@ -32,7 +32,9 @@ def test_price_question_returns_formatted_full_price(tools):
     assert top["name"].startswith("Takamine GD20")
     assert top["price"] == "R$ 2.199,00"
     assert "promotion" not in top  # the promotion rows for this product are inactive
-    assert top["max_installments"] == "12x R$ 183,25"
+    # Values carry their meaning, so a model cannot mix PIX with card installments.
+    assert top["max_installments"].startswith("12x R$ 183,25 (credit card")
+    assert top["pix_price"].startswith("R$ 2.089,05 (paid at once via PIX")
 
 
 def test_promotional_price_shows_original_price_and_discount(tools):
