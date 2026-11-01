@@ -211,9 +211,18 @@ class ToolExecutor:
         return result
 
     def _tool_get_product_details(self, product_id: int) -> dict:
-        product = self.store.products.get(int(product_id))
+        try:
+            product = self.store.products.get(int(product_id))
+        except (TypeError, ValueError):
+            # Small models pass the product name here; tell them how to recover.
+            return {
+                "error": (
+                    f"product_id must be the numeric id returned by search_products, not {product_id!r}. "
+                    f"To look a product up by name, call search_products with query={str(product_id)!r}."
+                )
+            }
         if product is None:
-            return {"error": f"Product {product_id} not found."}
+            return {"error": f"Product {product_id} not found. Use search_products to find the right id."}
         pricing = self.store.pricing(product)
         details = self._summary(product)
         details["specs"] = product.specs

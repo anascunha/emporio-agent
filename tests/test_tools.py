@@ -157,3 +157,10 @@ def test_price_filter_is_spelled_out_and_impossible_range_rejected(tools):
     assert result["price_filter_applied"] == "from R$ 1.000,00"
     assert "up to R$ 1.000,00" == call(tools, "search_products", category="Violões", max_price=1000)["price_filter_applied"]
     assert "min_price is greater" in call(tools, "search_products", min_price=1000, max_price=999.99)["error"]
+
+
+def test_product_name_instead_of_id_explains_how_to_recover(tools):
+    # Found in manual testing: llama3.2 passed "Takamine GD20" as product_id and, given a
+    # raw Python error, told the customer the product did not exist.
+    error = call(tools, "get_product_details", product_id="Takamine GD20")["error"]
+    assert "search_products" in error and "Takamine GD20" in error
