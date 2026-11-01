@@ -27,11 +27,12 @@ EXAMPLES = [
     ("02-promotion-and-pix", "03-active-promotion-no-pix-stacking", "Active promotion: original price, discount, no PIX stacking"),
     ("03-order-status-with-verification", "10-late-order-with-verification", "Order status: identity check, then a late delivery"),
     ("04-return-expired-but-warranty", "11-return-expired-but-warranty", "Non-trivial: regret window expired, defect still under the legal warranty"),
-    ("05-prompt-injection-and-scope", "15-jailbreak-discount", "Out of scope: instruction override asking for a fake discount"),
+    ("05-english-speaking-customer", "16-english-customer", "English-speaking customer: price and installments answered in English"),
 ]
 COMPARISON_CASES = [
     "03-active-promotion-no-pix-stacking",
     "11-return-expired-but-warranty",
+    "15-jailbreak-discount",
     "16-english-customer",
 ]
 CRITERIA = ["grounding", "tone", "helpfulness", "policy_adherence"]
