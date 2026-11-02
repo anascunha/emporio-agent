@@ -137,7 +137,7 @@ The full, dated log — including who proposed each decision — is in [`docs/de
 
 **Security and privacy.** Order tools require the order number **and** the buyer's registered e-mail or phone, checked in code — the model cannot skip it. "Order not found" and "contact does not match" return the same message, and verification locks after 5 failures per conversation. No personal data beyond the customer's first name is returned. Anthropic requests use prompt caching for the system prompt, tools and history.
 
-**Interface: CLI + Streamlit** on the same core. The web chat simulates the two channels a customer would use: a **mobile-messenger** skin (the manual names WhatsApp as the main remote channel) and a **website widget** with a greeting and quick replies, each with its own conversation, in the store's navy and orange with a light/dark selector. The interface is in English by default with an optional Portuguese version (`?lang=pt`); Mel answers in the language of each customer message either way. A sidebar toggle (off by default) reveals each tool call and its result under the reply. Styling is plain Streamlit + CSS; model text is only rendered as escaped Markdown.
+**Interface: CLI + Streamlit** on the same core. The web chat is a store page with a **website chat widget** (greeting, quick replies) in the store's navy and orange, with a light/dark selector. The agent core does not depend on the channel; a real messaging channel such as WhatsApp is listed under future work with what it would take. The interface is in English by default with an optional Portuguese version (`?lang=pt`); Mel answers in the language of each customer message either way. A sidebar toggle (off by default) reveals each tool call and its result under the reply. Styling is plain Streamlit + CSS; model text is only rendered as escaped Markdown.
 
 **Conversation history: in memory, per session.** It is what makes follow-ups work ("and if it's defective?"). It is not persisted to disk: a support chat is short and the history contains personal data (LGPD, manual section 9). The exception is `escalate_to_human`, which appends the case to `data/runtime/escalations.jsonl` (git-ignored) to simulate handing it to the team.
 
@@ -212,7 +212,7 @@ The evaluation also found a crash (a local model sending `null` arguments) and A
 1. A larger evaluation set built from real (anonymized) conversations, several runs per model, and CI that fails on regressions.
 2. Streaming responses in the UI, and templates for prices and installments so the model only writes the conversational part.
 3. Semantic product search and recommendations by profile ("beginner, budget R$ 800").
-4. Persistent sessions and customer identification by channel (e.g. WhatsApp number) instead of order number + e-mail.
+4. **WhatsApp channel** (the manual's main remote channel). The agent core is channel-agnostic, so the work is integration: a WhatsApp Business (Meta Cloud API) account with a verified number; a public webhook service that receives messages and calls the same `Agent`; one persistent session per phone number; Meta's rules (24-hour reply window, pre-approved templates for messages outside it); and identifying customers by their phone number instead of asking for order number + e-mail. A web widget on the real site is a shorter path (a small HTTP API in front of the agent).
 5. Observability: structured logs of every tool call, latency and cost per conversation.
 6. An automatic report of data anomalies (order totals that do not match, inactive promotions still listed) for the store team.
 
@@ -224,7 +224,7 @@ I used **Claude Code** (Anthropic's CLI agent, running Claude Opus 5.5) as a pai
 2. **Analysis.** I asked Claude to read the challenge, the policy manual and the CSVs and point out traps and contradictions (inactive promotions, status vs. stock, misleading descriptions, conflicting installment rules, two phone numbers). Those became the assumptions table above.
 3. **Decisions.** For each architectural or business-rule choice, Claude presented options with trade-offs and a recommendation; I chose. Some choices were mine against or beyond the recommendation: building **both** a CLI and a Streamlit UI, using **Sonnet** as the default model, building an **evaluation** to back the model choice, adding an **LLM judge** on top of the code checks, and switching the repository to **English** midway. Every decision is logged with who proposed it in [`docs/decisions.md`](docs/decisions.md).
 4. **Implementation.** Claude wrote the code and tests for each step; each step was run, tested and committed separately (the history shows the real order of work).
-5. **Sub-agents.** Two tasks ran in parallel as Claude sub-agents: planning the two-skin chat UI (reviewed and approved by me before implementation; two of its claims were checked and one was wrong) and writing the store-team [User Guide](docs/USER_GUIDE.md) (every value checked against the data before committing).
+5. **Sub-agents.** Two tasks ran in parallel as Claude sub-agents: planning the chat UI (reviewed and approved by me before implementation; two of its claims were checked and one was wrong; I later cut it from two channel skins to the website widget only) and writing the store-team [User Guide](docs/USER_GUIDE.md) (every value checked against the data before committing).
 6. **Verification.** Unit tests for all business rules, scripted fake LLMs for the agent loop, AppTest smoke tests for the UI, real runs with a local model, headless-browser screenshots of the UI, and the model evaluation. My own testing drove several fixes: Portuguese plurals in search, English answers with Ollama, and the UI colors and light/dark selector.
 
 What I kept for myself: scope, business rules and their interpretation, model choice, the evaluation design, and reviewing the outputs.
@@ -243,8 +243,8 @@ src/emporio/
   agent.py         function-calling loop
   transcript.py    Markdown export of conversations
   cli.py           terminal chat
-streamlit_app.py   web chat (sidebar controls, channel skins, turn handling)
-chat_ui/           web chat presentation: per-channel state, skins, rendering, CSS
+streamlit_app.py   web chat (sidebar controls, store page, turn handling)
+chat_ui/           web chat presentation: conversation state, texts (EN/PT), rendering, CSS
 evals/             model evaluation (cases, checks, LLM judge, runner, language probe, results)
 scripts/           example export (from a saved run) and generation (live)
 examples/          example conversations + model comparison

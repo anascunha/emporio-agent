@@ -36,8 +36,6 @@
   white-space: nowrap; font-variant-numeric: tabular-nums;
 }
 [class*="-bubble-user-"] .msg-meta { color: inherit; opacity: 0.7; }
-.tick { letter-spacing: -3px; margin-left: 4px; }
-.tick.read { color: var(--tick-read); opacity: 1; font-weight: 700; }
 
 .chat-header { display: flex; align-items: center; gap: 11px; padding: 12px 16px; }
 .chat-header .avatar {

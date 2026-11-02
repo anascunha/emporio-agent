@@ -72,18 +72,13 @@ You'll need a computer with internet access and a terminal (Terminal on macOS/Li
 
 ## 4. Using the web chat
 
-The web chat has a **sidebar** on the left and the conversation on the right.
+The web chat looks like a page of the store's website with a **chat widget** on the right: Mel greets you and offers quick-reply buttons such as *"Acoustic guitars under R$ 1.000"*, *"My order status"*, *"Store hours"* and *"Returns and exchanges"*. The **sidebar** on the left has the controls for testing:
 
-- **Channel selector.** Pick how the chat looks:
-  - **📱 Mobile messenger**: a phone-style chat, like WhatsApp.
-  - **💻 Website chat**: a store-branded widget like the one on a website, with a greeting and quick-reply buttons such as *"Acoustic guitars under R$ 1.000"*, *"My order status"*, *"Store hours"* and *"Returns and exchanges"* (in Portuguese when the interface language is Português).
-  
-  Each channel keeps **its own separate conversation**, so you can test two scenarios side by side. Both channels use the same Mel underneath. The channels are a simulation; see the [FAQ](#10-faq).
 - **Interface language.** English (default) or Português. It changes the chat's buttons, greeting and labels; Mel always answers in the language the customer writes in.
 - **Theme.** Light, Dark or Auto (follows your computer).
 - **Provider / model selector.** Switch between Claude and Ollama models. Changing it may start a fresh conversation.
 - **Show tool calls** (OFF by default). When ON, a collapsed developer note under each reply shows which lookup Mel ran ([tool call](#11-glossary)) and what came back. Turn it on when testing: it lets you confirm an answer came from the system and not from Mel's imagination.
-- **New conversation.** Clears the current channel's conversation and starts over (also resets the failed-attempts counter for orders).
+- **New conversation.** Clears the conversation and starts over (also resets the failed-attempts counter for orders).
 
 ---
 
@@ -257,7 +252,7 @@ No conversation history is saved after the session. Only escalated cases are rec
 With Ollama: nothing beyond your computer. With Claude: you pay per use ([tokens](#11-glossary)), so cost grows with the number and length of conversations; [prompt caching](#11-glossary) reduces it. Check actual spend in the Anthropic console. The model-comparison test costs extra (judge ≈ US$ 2 per full run).
 
 **Can she handle WhatsApp for real?**
-Not yet. The web chat **simulates** a WhatsApp-style channel and a website widget. A real WhatsApp integration (and recognizing customers by phone number) is planned future work.
+Not yet. The web chat shows Mel in a website widget. Because the agent does not depend on the channel, WhatsApp is an integration job (a WhatsApp Business account, a service that receives the messages, one conversation per phone number); it is listed as future work in the README.
 
 **Is she always right?**
 She's designed to be careful, but she's an AI. For returns and exceptions she gives the rule and hands the final decision to the team. Report odd answers to the technical team with the conversation details.

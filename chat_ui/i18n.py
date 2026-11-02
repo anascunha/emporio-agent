@@ -11,7 +11,6 @@ LANGUAGES = {"en": "English", "pt": "Português"}
 
 TEXT: dict[str, dict] = {
     "en": {
-        "msgr": {"title": "Empório da Música", "status_idle": "online", "status_typing": "typing…", "placeholder": "Message"},
         "web": {"title": "Chat with Mel", "status_idle": "Online now", "status_typing": "Mel is typing…", "placeholder": "Type your message…"},
         "greeting": (
             "Hi! I'm **Mel**, Empório da Música's virtual assistant 🎸\n\n"
@@ -19,8 +18,6 @@ TEXT: dict[str, dict] = {
             "How can I help?"
         ),
         "quick_replies": ("Acoustic guitars under R$ 1.000", "My order status", "Store hours", "Returns and exchanges"),
-        "day": "TODAY",
-        "msgr_notice": "Mel is a virtual assistant · ask for a person anytime",
         "error": "⚠️ Couldn't reply right now. Please try again in a moment.",
         "unanswered": "Message not answered. Please send it again.",
         "powered": "Virtual assistant · answers based on the store's system",
@@ -37,7 +34,6 @@ TEXT: dict[str, dict] = {
         },
     },
     "pt": {
-        "msgr": {"title": "Empório da Música", "status_idle": "online", "status_typing": "digitando…", "placeholder": "Mensagem"},
         "web": {"title": "Fale com a Mel", "status_idle": "Online agora", "status_typing": "Mel está digitando…", "placeholder": "Escreva sua mensagem…"},
         "greeting": (
             "Oi! Eu sou a **Mel**, assistente virtual da Empório da Música 🎸\n\n"
@@ -45,8 +41,6 @@ TEXT: dict[str, dict] = {
             "dúvidas sobre a loja. Como posso ajudar?"
         ),
         "quick_replies": ("Ver violões até R$ 1.000", "Status do meu pedido", "Horário da loja", "Trocas e devoluções"),
-        "day": "HOJE",
-        "msgr_notice": "Atendimento virtual da Mel · peça um atendente quando quiser",
         "error": "⚠️ Não foi possível responder agora. Tente novamente em instantes.",
         "unanswered": "Mensagem não respondida. Envie novamente, por favor.",
         "powered": "Atendimento virtual · respostas com base no sistema da loja",

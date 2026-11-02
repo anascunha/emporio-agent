@@ -1,4 +1,4 @@
-"""Per-channel conversation state kept in st.session_state."""
+"""Conversation state of the web chat, kept in st.session_state."""
 
 from __future__ import annotations
 
@@ -9,9 +9,6 @@ from zoneinfo import ZoneInfo
 import streamlit as st
 
 from emporio.agent import Agent, Reply
-
-CHANNELS = ("messenger", "website")
-
 
 @dataclass
 class ChatTurn:
@@ -31,28 +28,21 @@ class Conversation:
     turns: list[ChatTurn] = field(default_factory=list)
 
 
-def get_conversation(channel: str) -> Conversation:
-    chats = st.session_state.setdefault("chats", {c: Conversation() for c in CHANNELS})
-    return chats[channel]
+def get_conversation() -> Conversation:
+    return st.session_state.setdefault("chat", Conversation())
 
 
-def reset_conversation(channel: str) -> None:
-    get_conversation(channel)  # make sure the dict exists
-    st.session_state.chats[channel] = Conversation()
+def reset_conversation() -> None:
+    st.session_state.chat = Conversation()
 
 
-def reset_all() -> None:
-    st.session_state.chats = {c: Conversation() for c in CHANNELS}
-
-
-def queue(channel: str, text: str) -> None:
+def queue(text: str) -> None:
     """Button callback (runs before the script): send `text` on the next run."""
-    st.session_state.queued = (channel, text)
+    st.session_state.queued = text
 
 
-def pop_queued(channel: str) -> str | None:
-    queued = st.session_state.pop("queued", None)
-    return queued[1] if queued and queued[0] == channel else None
+def pop_queued() -> str | None:
+    return st.session_state.pop("queued", None)
 
 
 def now_hhmm() -> str:

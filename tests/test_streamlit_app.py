@@ -7,7 +7,7 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 from chat_ui.i18n import TEXT
-from chat_ui.skins import SKINS
+from chat_ui.skins import WEBSITE
 from chat_ui.state import md_escape
 from emporio.agent import Reply, ToolEvent
 
@@ -52,56 +52,49 @@ def markdown_text(at) -> str:
     return " ".join(m.value for m in at.markdown)
 
 
-def test_loads_on_messenger_without_errors(agents):
+def test_loads_with_greeting_and_quick_replies(agents):
     at = app()
     assert not at.exception
-    assert at.chat_input(key="msgr-input")
+    assert at.chat_input(key="web-input")
+    assert "virtual assistant" in markdown_text(at)  # English interface by default
+    assert at.button(key="web-chip-0")
     assert agents.created == []  # the agent is only created on the first message
 
 
 def test_sending_a_message_shows_the_reply(agents):
     at = app()
-    at.chat_input(key="msgr-input").set_value("oi").run()
+    at.chat_input(key="web-input").set_value("oi").run()
     assert not at.exception
     assert agents.created[0].received == ["oi"]
     assert "Oi!" in markdown_text(at)
     assert r"R\$ 1.000" in markdown_text(at)  # "$" escaped, so no LaTeX
 
 
-def test_website_channel_has_greeting_and_quick_replies(agents):
-    at = app()
-    at.sidebar.segmented_control(key="channel").set_value("website").run()
-    assert not at.exception
-    assert "virtual assistant" in markdown_text(at)  # English interface by default
-    assert at.button(key="web-chip-0")
-
-
 def test_quick_reply_sends_its_label(agents):
     at = app()
-    at.sidebar.segmented_control(key="channel").set_value("website").run()
     at.button(key="web-chip-2").click().run()
     assert agents.created[0].received == ["Store hours"]
 
 
 def test_portuguese_interface_option(agents):
     at = app()
-    at.sidebar.segmented_control(key="channel").set_value("website").run()
     at.sidebar.segmented_control(key="lang").set_value("pt").run()
     assert "assistente virtual" in markdown_text(at)
     at.button(key="web-chip-2").click().run()
     assert agents.created[0].received == ["Horário da loja"]
 
 
-def test_channels_keep_separate_conversations(agents):
+def test_new_conversation_clears_the_chat(agents):
     at = app()
-    at.chat_input(key="msgr-input").set_value("pedido 8").run()
-    at.sidebar.segmented_control(key="channel").set_value("website").run()
+    at.chat_input(key="web-input").set_value("pedido 8").run()
+    assert "pedido 8" in markdown_text(at)
+    at.sidebar.button[0].click().run()
     assert "pedido 8" not in markdown_text(at)
 
 
 def test_tool_viewer_only_when_toggle_is_on(agents):
     at = app()
-    at.chat_input(key="msgr-input").set_value("violões").run()
+    at.chat_input(key="web-input").set_value("violões").run()
     assert len(at.expander) == 0
     at.sidebar.toggle[0].set_value(True).run()
     assert len(at.expander) == 1
@@ -110,16 +103,15 @@ def test_tool_viewer_only_when_toggle_is_on(agents):
 def test_agent_errors_become_a_chat_notice(agents):
     agents.fail = True
     at = app()
-    at.chat_input(key="msgr-input").set_value("oi").run()
+    at.chat_input(key="web-input").set_value("oi").run()
     assert not at.exception
     assert any("reply right now" in h.value for h in at.get("html"))
     assert "no credits" in at.sidebar.error[0].value  # the developer sees the cause and the fix
 
 
-def test_md_escape_and_no_trademark_in_skins():
+def test_md_escape_and_no_trademark_in_the_interface():
     assert md_escape("R$ 1 e R$ 2") == r"R\$ 1 e R\$ 2"
-    for skin in SKINS.values():
-        assert "whatsapp" not in repr(skin).lower()
+    assert "whatsapp" not in repr(WEBSITE).lower()
     assert "whatsapp" not in repr(TEXT).lower()
 
 

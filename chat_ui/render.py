@@ -1,4 +1,4 @@
-"""Rendering helpers shared by both skins.
+"""Rendering helpers for the website chat widget.
 
 Model text only ever goes through st.markdown (which escapes HTML); st.html only
 receives strings built here from trusted values, escaped with html.escape.
@@ -40,10 +40,7 @@ def inject_css(skin: Skin, dark: bool) -> None:
 def header_html(skin: Skin, lang: str, typing: bool) -> str:
     text = TEXT[lang][skin.key]
     status = text["status_typing"] if typing else text["status_idle"]
-    statusbar = (
-        '<div class="msgr-statusbar"><span>9:41</span><span>5G ▮▮▮ 87%</span></div>' if skin.key == "msgr" else ""
-    )
-    return statusbar + (
+    return (
         f'<div class="chat-header {skin.key}-header">'
         f'<div class="avatar">{html.escape(skin.avatar)}</div>'
         f'<div class="who"><div class="name">{html.escape(text["title"])}</div>'
@@ -52,17 +49,10 @@ def header_html(skin: Skin, lang: str, typing: bool) -> str:
     )
 
 
-def _meta_html(skin: Skin, time: str | None, read: bool | None) -> str:
-    ticks = ""
-    if skin.ticks and read is not None:
-        ticks = f' <span class="tick{" read" if read else ""}">✓✓</span>'
-    return f'<div class="msg-meta">{html.escape(time or "")}{ticks}</div>'
-
-
-def bubble(skin: Skin, role: str, key: str, text: str, time: str | None, read: bool | None = None) -> None:
+def bubble(skin: Skin, role: str, key: str, text: str, time: str | None) -> None:
     with st.container(key=f"{skin.key}-bubble-{role}-{key}", width="content", gap=None):
         st.markdown(md_escape(text))
-        st.html(_meta_html(skin, time, read))
+        st.html(f'<div class="msg-meta">{html.escape(time or "")}</div>')
 
 
 def notice(skin: Skin, text: str) -> None:
@@ -83,14 +73,14 @@ def tool_viewer(skin: Skin, key: str, turn: ChatTurn) -> None:
 
 def render_history(skin: Skin, lang: str, conv: Conversation, show_tools: bool, in_flight: bool) -> None:
     """Draw the whole conversation. The last turn may still be waiting for its reply."""
-    if skin.greets:
-        with st.container(key=f"{skin.key}-row-bot-greeting", gap="xxsmall"):
-            bubble(skin, "bot", "greeting", TEXT[lang]["greeting"], None)
+    # Website widgets greet first; the greeting is interface text, not part of the LLM history.
+    with st.container(key=f"{skin.key}-row-bot-greeting", gap="xxsmall"):
+        bubble(skin, "bot", "greeting", TEXT[lang]["greeting"], None)
     for i, turn in enumerate(conv.turns):
         waiting = in_flight and i == len(conv.turns) - 1
         answered = turn.reply is not None
         with st.container(key=f"{skin.key}-row-user-{i}", horizontal=True, horizontal_alignment="right"):
-            bubble(skin, "user", str(i), turn.user, turn.sent_at, read=answered or waiting)
+            bubble(skin, "user", str(i), turn.user, turn.sent_at)
         if answered:
             with st.container(key=f"{skin.key}-row-bot-{i}", gap="xxsmall"):
                 bubble(skin, "bot", str(i), turn.reply.text, turn.replied_at)
@@ -104,12 +94,6 @@ def render_history(skin: Skin, lang: str, conv: Conversation, show_tools: bool, 
             notice(skin, TEXT[lang]["unanswered"])
 
 
-def quick_replies(skin: Skin, lang: str, channel: str, on_click, disabled: bool) -> None:
+def quick_replies(skin: Skin, lang: str, on_click, disabled: bool) -> None:
     for n, label in enumerate(TEXT[lang]["quick_replies"]):
-        st.button(
-            md_escape(label),
-            key=f"{skin.key}-chip-{n}",
-            on_click=on_click,
-            args=(channel, label),
-            disabled=disabled,
-        )
+        st.button(md_escape(label), key=f"{skin.key}-chip-{n}", on_click=on_click, args=(label,), disabled=disabled)
