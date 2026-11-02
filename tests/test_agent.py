@@ -182,8 +182,14 @@ def test_anthropic_language_hint_is_a_system_message_after_the_user_turn():
     assert sent[1]["role"] == "system" and "English" in sent[1]["content"]
 
 
-def test_ollama_language_hint_goes_inside_the_user_message():
+def test_ollama_language_hint_only_when_the_customer_switches_language():
     session = OllamaSession("m", "system", [SCHEMA], host="", client=FakeOllama([]))
+    session.add_user_message("Oi, vocês abrem sábado?", "pt")
+    # First message: no hint at all (any hint made qwen2.5:3b skip tools).
+    assert session.messages[0]["content"] == "system"
+    assert session.messages[-1]["content"] == "Oi, vocês abrem sábado?"
     session.add_user_message("How much is it?", "en")
-    assert [m["role"] for m in session.messages] == ["system", "user"]
-    assert session.messages[-1]["content"].endswith("reply in English.)")
+    # Switch: the hint goes into the leading system message, never into the user turn.
+    assert session.messages[0]["content"].endswith("reply in English.")
+    assert session.messages[-1]["content"] == "How much is it?"
+    assert [m["role"] for m in session.messages] == ["system", "user", "user"]

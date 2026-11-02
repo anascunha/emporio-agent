@@ -38,3 +38,16 @@ Yamaha F310? Can I pay in installments?" (the second message is detected as Engl
 Conclusion: the hint placement is provider-specific. Claude follows a mid-conversation system
 message; qwen2.5:3b's chat template handles it badly, so for Ollama the hint is appended to the
 customer's message.
+
+## Follow-up 2 (2026-11-01): the inline hint broke tool use
+
+A scripted pass of the test checklist showed qwen inventing store facts. A/B test, 3 runs each:
+
+| Hint placement (qwen2.5:3b) | Store info (address) | Portuguese price question | English price question | PT→EN switch |
+|---|---|---|---|---|
+| Inside every customer message (decision #53) | 0/3 | 0/3 | 3/3 | 4/5 |
+| No hint | 3/3 | 2/3 | 3/3 | fails (original report) |
+| Leading system message, every turn | address right, hours missing | 0/3 | 3/3 | 3/3 |
+| **Leading system message, only after a language switch** (decision #64) | **3/3** | **2/3** | **3/3** | **3/3** |
+
+Lesson: #53 was validated on one question (price) that happened to keep working; a full run would have caught the regression. Claude is unaffected (its hint stays a mid-conversation system message, 0/15 wrong-language answers).

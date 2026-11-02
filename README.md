@@ -189,6 +189,8 @@ How the evaluation changed the project (each step is a commit and a row in the d
 3. **Language experiment** (`evals/results/language-probe.md`): Haiku answered English speakers in Portuguese 13/15 times, even after a one-line catalog result. A system-prompt reminder brought it to 9/15; a per-message hint with the language detected in code brought it to **0/15**. For qwen2.5:3b the same hint only works inside the customer's message (4/5; as a system message 0/3, and it even started inventing prices).
 4. **Run 3** (final code) stopped when the API credits ran out during judging; the console log kept the code checks: **Sonnet, Haiku and Opus all passed 16/16**, including Haiku's English case. The runner now saves after every model.
 
+**Manual testing** ([`docs/manual-tests.md`](docs/manual-tests.md)): 16 dialogs with the local model before delivery, read and judged by hand. They led to five general fixes in tool outputs and language handling, and caught a regression introduced by the previous day's language fix (a hint in the customer's message made qwen skip tools; fixed and re-measured, run 4: qwen 9/17 without judge). qwen-specific weaknesses (returns, complaints, refusals) are documented, not patched.
+
 The evaluation also found a crash (a local model sending `null` arguments) and Ana's own testing found that the Portuguese-only data broke searches (`violão` returned no products; "acoustic guitar" returned electric guitars). Both were fixed with regression tests.
 <!-- RESULTS:END -->
 
@@ -199,7 +201,7 @@ The evaluation also found a crash (a local model sending `null` arguments) and A
 - Prompt-injection defense is the prompt plus tools that validate everything: the model cannot bypass identity checks or invent a price in a tool result, but it could still be talked into off-topic chat.
 - Product search is keyword-based: accents, Portuguese plurals, small typos and a short list of English category words are handled, but there is no semantic matching ("something for a beginner" relies on the model choosing filters).
 - **qwen2.5:3b reads "under R$ 1,000" as a minimum price** (5/5 in manual testing; [`docs/manual-tests.md`](docs/manual-tests.md)) and then lists more expensive guitars as "under". The same question in Portuguese works. Clearer parameter descriptions and renamed parameters did not help; evaluation case 17 measures it. Use Claude for customer-facing answers.
-- Language detection counts common Portuguese/English words: other languages are not detected, and very short messages keep the previous language. Small local models still answer in the wrong language about 1 time in 5.
+- Language detection counts common Portuguese/English words: other languages are not detected, and very short messages keep the previous language. With qwen2.5:3b the hint is only added after a language switch (any extra hint made it skip tools), so it occasionally answers a first English message in Portuguese.
 - Opening hours are not enforced in real time (the manual's after-hours message is not applied automatically).
 - Final-sale and customized items cannot be identified per order (the data has no such field); the agent states the rule and leaves the decision to the team.
 - Conversation history is lost when the session ends; no customer identification across channels.

@@ -155,15 +155,24 @@ class OllamaSession(ChatSession):
         self.model = model
         self.tools = [{"type": "function", "function": t} for t in tools]
         self.tool_names = {t["name"] for t in tools}
+        self.system = system
         self.messages: list[dict] = [{"role": "system", "content": system}]
         self.usage = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
+        self.first_language: str | None = None
+        self.hint_active = False
 
     def add_user_message(self, text: str, reply_language: str | None = None) -> None:
-        # Small local models ignore (and get confused by) a system message in the middle
-        # of the conversation: with qwen2.5:3b it skipped tools and invented prices. The
-        # hint goes inside the customer's message instead (see docs/decisions.md).
+        # qwen2.5:3b already answers a first message in its own language, and any extra
+        # hint costs tool use: inside the customer's message it skipped tools and invented
+        # facts; as a mid-conversation system message it was ignored. So the hint is only
+        # added when the customer switches language, in the leading system message
+        # (measurements in evals/results/language-probe.md).
         if reply_language:
-            text = f"{text}\n\n({language_hint(reply_language)})"
+            if self.first_language is None:
+                self.first_language = reply_language
+            elif reply_language != self.first_language or self.hint_active:
+                self.hint_active = True
+                self.messages[0]["content"] = f"{self.system}\n\n{language_hint(reply_language)}"
         self.messages.append({"role": "user", "content": text})
 
     def complete(self) -> Turn:
