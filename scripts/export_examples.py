@@ -3,11 +3,11 @@
 The evaluation stores every conversation, tool call and judge score in
 evals/results/*.json. This script turns selected ones into Markdown:
 
-- examples/NN-*.md: one real conversation each, from the default model;
-- examples/model-comparison.md: the same questions answered by every model tested.
+- examples/NN-*.md: one real conversation each, from the default model (final code, run 5);
+- examples/model-comparison.md: the same questions answered by every model tested (run 2,
+  the last run with all five models and judge scores).
 
     uv run python scripts/export_examples.py
-    uv run python scripts/export_examples.py --run evals/results/run2-judge-and-prompt-fixes.json
 """
 
 from __future__ import annotations
@@ -17,7 +17,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_RUN = ROOT / "evals" / "results" / "run2-judge-and-prompt-fixes.json"
+DEFAULT_RUN = ROOT / "evals" / "results" / "run5-claude-final-no-judge.json"  # final code
+COMPARISON_RUN = ROOT / "evals" / "results" / "run2-judge-and-prompt-fixes.json"  # all 5 models
 EXAMPLES_DIR = ROOT / "examples"
 MAIN_MODEL = "anthropic:claude-sonnet-5-5"
 
@@ -64,11 +65,14 @@ def verdict(result: dict) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=Path, default=DEFAULT_RUN)
+    parser.add_argument("--comparison-run", type=Path, default=COMPARISON_RUN)
     args = parser.parse_args()
 
-    data = json.loads(args.run.read_text(encoding="utf-8"))
-    runs = {model: {r["case"]: r for r in results} for model, results in data["runs"].items()}
-    source = args.run.relative_to(ROOT).as_posix()
+    def load(path: Path) -> tuple[dict, str]:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return {m: {r["case"]: r for r in rs} for m, rs in data["runs"].items()}, path.relative_to(ROOT).as_posix()
+
+    runs, source = load(args.run)
     EXAMPLES_DIR.mkdir(exist_ok=True)
 
     for filename, case, title in EXAMPLES:
@@ -83,6 +87,7 @@ def main() -> None:
         ]
         (EXAMPLES_DIR / f"{filename}.md").write_text("\n".join(lines), encoding="utf-8")
 
+    runs, source = load(args.comparison_run)
     lines = [
         "# Same questions, every model tested",
         "",

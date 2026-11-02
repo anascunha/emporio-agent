@@ -1,30 +1,29 @@
 # Non-trivial: regret window expired, defect still under the legal warranty
 
-_Model: `claude-sonnet-5-5` · exported from the evaluation run `evals/results/run2-judge-and-prompt-fixes.json` (case `11-return-expired-but-warranty`) · ✅ all checks passed · judge grounding 4/5, tone 5/5, helpfulness 5/5, policy_adherence 5/5_
+_Model: `claude-sonnet-5-5` · exported from the evaluation run `evals/results/run5-claude-final-no-judge.json` (case `11-return-expired-but-warranty`) · ✅ all checks passed_
 
 **Customer:** Me arrependi da compra, posso devolver? É o pedido 7, meu telefone é (67) 99789-0123.
 
 > 🔧 `check_return_options({"order_id": 7, "contact": "(67) 99789-0123", "reason": "regret"})`
 
-**Mel:** Infelizmente o prazo de arrependimento do pedido 7 já passou. 😕
+**Mel:** Oi! Olhei o pedido 7 e, infelizmente, o prazo de arrependimento já passou. 😕
 
 - O prazo é de 7 dias após o recebimento.
-- O pedido foi comprado em 03/02/2026.
-- A data estimada de entrega foi 17/02/2026, ou seja, já se passaram 34 dias.
+- O pedido foi feito em 03/02/2026, e a entrega estimada foi em 17/02/2026. Já se passaram 34 dias desde então.
+- A data de recebimento é uma estimativa, e a equipe confirma a decisão final.
 
-Se o produto tiver **defeito de fabricação**, a garantia legal de 90 dias a partir do recebimento ainda pode valer. Esse caso eu consigo verificar.
-
-Quer que eu verifique por esse motivo? Se preferir, também posso registrar o caso para a equipe avaliar. A decisão final é sempre confirmada por eles.
+Se o produto tiver **defeito de fabricação**, a garantia legal de 90 dias a partir do recebimento ainda pode valer. Quer que eu verifique por esse motivo? Se preferir, posso registrar seu caso para a equipe avaliar.
 
 **Customer:** E se ele estiver com defeito?
 
 > 🔧 `check_return_options({"order_id": 7, "contact": "(67) 99789-0123", "reason": "defect"})`
 
-**Mel:** Se o defeito for de fabricação, você ainda tem cobertura. 🙌
+**Mel:** Se for defeito de fabricação, você ainda tem cobertura. 🙌
 
-- Já passaram mais de 30 dias da compra, então não dá para fazer a troca direta na loja.
+- Já passaram mais de 30 dias da compra, então não dá para fazer a troca direta com a loja.
 - Você ainda está dentro da **garantia legal de 90 dias**, e restam **56 dias**.
-- A garantia é acionada com o fabricante, e a loja pode intermediar se você pedir.
-- Ela não cobre mau uso, quedas, umidade, modificações não autorizadas, desgaste natural nem danos estéticos.
+- A garantia é acionada com o fabricante. A loja pode intermediar se você pedir.
+- Não são cobertos: mau uso, quedas, umidade, modificações não autorizadas, desgaste natural e danos estéticos.
+- A data de recebimento é uma estimativa, e a equipe confirma a decisão final.
 
-Quer que eu registre o caso para a equipe da loja intermediar? Se quiser, me diga qual é o defeito. Eles respondem em até 24 horas úteis.
+Quer que eu registre o caso para a equipe intermediar? Se quiser, me conte rapidinho qual é o defeito.
