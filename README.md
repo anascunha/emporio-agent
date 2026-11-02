@@ -100,7 +100,7 @@ Using Ollama instead of Claude: `ollama pull qwen2.5:3b` (or any model with tool
 Other commands:
 
 ```bash
-uv run pytest                            # 68 tests, no network or LLM needed (< 3 s)
+uv run pytest                            # 73 tests, no network or LLM needed (< 3 s)
 uv run python -m evals.run               # model comparison → evals/results/<timestamp>.md
 uv run python -m evals.language_probe    # language-drift experiment (see Model evaluation)
 uv run python scripts/export_examples.py     # rebuilds examples/ from a saved evaluation run (free)
@@ -252,5 +252,5 @@ data/              provided CSVs and manual (+ Markdown transcription)
 docs/decisions.md  decision log
 docs/USER_GUIDE.md guide for the store team (how it works, how to test)
 docs/manual-tests.md  dialogs tested by hand before delivery
-tests/             68 tests
+tests/             73 tests
 ```
