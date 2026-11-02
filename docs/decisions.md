@@ -53,9 +53,9 @@ Legend: **Ana** = my decision · **Claude → Ana** = option proposed by Claude 
 | 28 | **Prompt caching** of system prompt, tools and history on Anthropic | Claude | They are resent every turn; caching cuts cost and latency. |
 | 29 | At most **6 tool rounds** per customer message, then a polite fallback | Claude | A confused model cannot loop forever. |
 | 30 | Ollama: recover tool calls that a small model writes as JSON in the text | Claude | Common failure of 3B models; only accepted when the name matches a real tool. |
+| 31 | Streamlit app in `streamlit_app.py` with provider/model selector and an optional **tool-call viewer** | Claude | Shows the agent's reasoning path (which tool, which arguments, what came back) during the interview demo. |
 
 First local run (qwen2.5:3b on a GTX 1650): price question answered correctly via `search_products`, but the opening-hours question was answered **without calling `get_policy`** (evasive answer), ~1 min per reply. Evidence for #2 and input for the evaluation.
-| 31 | Streamlit app in `streamlit_app.py` with provider/model selector and an optional **tool-call viewer** | Claude | Shows the agent's reasoning path (which tool, which arguments, what came back) during the interview demo. |
 
 ## 2026-10-31 — Model evaluation
 
