@@ -10,13 +10,13 @@ config:
   look: handDrawn
   theme: neutral
 ---
-flowchart LR
+flowchart TB
     C([🧑 Customer]) <--> UI["CLI / Streamlit"]
     UI <--> A{{"Agent loop<br/>(agent.py)"}}
     A <-->|"history + tool schemas<br/>⇄ text or tool calls"| LLM["🧠 LLM<br/>Claude Sonnet 5.5<br/>or local Ollama"]
     A <-->|"tool calls ⇄ JSON results"| T["ToolExecutor<br/>(tools.py)"]
 
-    subgraph data ["Store data: what is true"]
+    subgraph data ["Store data"]
         direction TB
         S1["search_products<br/>get_product_details"]
         S2["get_order_status<br/>check_return_options"]
@@ -25,7 +25,7 @@ flowchart LR
         S2 -->|"order no. + e-mail/phone<br/>verified in code"| D
     end
 
-    subgraph rules ["Store policies: what is allowed"]
+    subgraph rules ["Store policies"]
         direction TB
         S3["get_policy(topic)"]
         P[("policies.py<br/>manual by section")]

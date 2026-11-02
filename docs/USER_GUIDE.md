@@ -50,21 +50,21 @@ Mel separates two kinds of information:
 You'll need a computer with internet access and a terminal (Terminal on macOS/Linux, PowerShell on Windows). Run each command from inside the `emporio-agent` folder.
 
 1. **Install uv** (it installs Python and the project's dependencies for you, see [uv](#11-glossary)):
-   - macOS / Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-   - Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+    - macOS / Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+    - Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 2. **Install the project:** `uv sync`
 3. **Create your settings file:** copy `.env.example` to `.env`
-   - macOS / Linux: `cp .env.example .env` · Windows: `copy .env.example .env`
+    - macOS / Linux: `cp .env.example .env` · Windows: `copy .env.example .env`
 4. **Choose the AI "brain"** ([provider and model](#11-glossary)) by editing `.env` in any text editor:
 
-   | Option | What to set in `.env` | Pros | Cons |
-   |---|---|---|---|
-   | **Claude** (recommended) | `ANTHROPIC_API_KEY=` followed by your key from [console.anthropic.com](https://console.anthropic.com) | Best answer quality and tool use; fast | Paid per use ([API credits](#11-glossary)) |
-   | **Ollama** (free, local) | `LLM_PROVIDER=ollama`, then install [Ollama](https://ollama.com) and run `ollama pull qwen2.5:3b` | Free, nothing leaves your computer | Noticeably lower quality; can be slow (up to ~1 minute per reply on a modest graphics card) |
+    | Option | What to set in `.env` | Pros | Cons |
+    |---|---|---|---|
+    | **Claude** (recommended) | `ANTHROPIC_API_KEY=` followed by your key from [console.anthropic.com](https://console.anthropic.com) | Best answer quality and tool use; fast | Paid per use ([API credits](#11-glossary)) |
+    | **Ollama** (free, local) | `LLM_PROVIDER=ollama`, then install [Ollama](https://ollama.com) and run `ollama pull qwen2.5:3b` | Free, nothing leaves your computer | Noticeably lower quality; can be slow (up to ~1 minute per reply on a modest graphics card) |
 
 5. **Start Mel:**
-   - Web chat (recommended): `uv run streamlit run streamlit_app.py`. Your browser opens at `http://localhost:8501`.
-   - Terminal chat: `uv run python -m emporio`. Type `/novo` for a new conversation and `/sair` to quit. Add `--debug` to see which lookups Mel runs.
+    - Web chat (recommended): `uv run streamlit run streamlit_app.py`. Your browser opens at `http://localhost:8501`.
+    - Terminal chat: `uv run python -m emporio`. Type `/novo` for a new conversation and `/sair` to quit. Add `--debug` to see which lookups Mel runs.
 
 > **About "today": the reference date.** The sample data ends in March 2026 (the latest order is from 22/03/2026), so Mel treats **23/03/2026** as "today" (setting `EMPORIO_TODAY=2026-03-23`). All deadlines (late deliveries, the 7-day return window, the 90-day warranty) are counted from that date, which keeps the test results in this guide valid. If you set `EMPORIO_TODAY=real`, Mel uses the computer's actual date. With the sample data, every pending order would then look months late and every return window would be expired, so use `real` only with live data.
 
